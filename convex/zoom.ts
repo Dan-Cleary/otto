@@ -107,8 +107,9 @@ export const pollNewRecordings = internalAction({
 
       for (const m of meetings) {
         const startMs = Date.parse(m.start_time ?? "");
-        if (Number.isFinite(startMs) && startMs <= since) continue;
-        if (Number.isFinite(startMs) && startMs > maxStart) maxStart = startMs;
+        if (!Number.isFinite(startMs)) continue;
+        if (startMs <= since) continue;
+        if (startMs > maxStart) maxStart = startMs;
 
         const transcriptFile = (m.recording_files ?? []).find(
           (f: any) => f.file_type === "TRANSCRIPT",
@@ -217,12 +218,6 @@ export const saveCreds = action({
 // This requires Otto's operator to register ONE Zoom Marketplace app
 // and set ZOOM_OAUTH_CLIENT_ID + ZOOM_OAUTH_CLIENT_SECRET in convex
 // env. Customers themselves never see Zoom credentials.
-
-const OAUTH_SCOPES = [
-  "recording:read:admin",
-  "meeting:read:admin",
-  "user:read:admin",
-];
 
 export const getOAuthConnectUrl = action({
   args: { teamId: v.id("teams"), returnTo: v.optional(v.string()) },
