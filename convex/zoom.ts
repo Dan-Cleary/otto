@@ -100,7 +100,7 @@ export const pollNewRecordings = internalAction({
           fromDate,
           toDate,
         );
-      } catch (err) {
+      } catch {
         // Skip user on error rather than failing the whole poll.
         continue;
       }

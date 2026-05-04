@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "convex dev",
     "widget:build": "esbuild widget/src/index.ts --bundle --minify --outfile=app/public/otto.js --target=es2020 --loader:.svg=base64",
-    "test": "vitest run"
+    "test": "vitest run",
+    "lint": "eslint convex app/src widget/src",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@auth/core": "^0.37.0",
@@ -18,8 +20,13 @@
   "devDependencies": {
     "@edge-runtime/vm": "^5.0.0",
     "@types/node": "^22.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.59.2",
+    "@typescript-eslint/parser": "^8.59.2",
     "convex-test": "^0.0.50",
     "esbuild": "^0.24.0",
+    "eslint": "^9.39.4",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
     "typescript": "^5.6.0",
     "vitest": "^4.1.5"
   }
