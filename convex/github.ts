@@ -4,7 +4,7 @@ import { v } from "convex/values";
 import { action, internalAction } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { requireAuthAction } from "./auth";
-import { createSign, createHmac, randomBytes, timingSafeEqual } from "node:crypto";
+import { createSign, createHmac, timingSafeEqual } from "node:crypto";
 
 // Otto's GitHub App. One app, many per-team installations. Each
 // install gives us an installation_id that we exchange (via JWT-signed
