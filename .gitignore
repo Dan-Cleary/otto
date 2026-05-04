@@ -7,3 +7,4 @@ app/public/otto.js
 .convex
 .gstack/
 .vercel
+.DS_Store
