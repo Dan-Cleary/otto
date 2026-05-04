@@ -18,6 +18,10 @@
     {
       "source": "/zoom/webhook",
       "destination": "https://resolute-lemming-209.convex.site/zoom/webhook"
+    },
+    {
+      "source": "/github/webhook",
+      "destination": "https://resolute-lemming-209.convex.site/github/webhook"
     }
   ],
   "headers": [
