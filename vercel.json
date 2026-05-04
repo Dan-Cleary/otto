@@ -6,7 +6,9 @@
   "framework": null,
   "cleanUrls": true,
   "redirects": [
-    { "source": "/app", "destination": "/app/", "permanent": false }
+    { "source": "/app", "destination": "/dashboard/", "permanent": false },
+    { "source": "/app/(.*)", "destination": "/dashboard/$1", "permanent": false },
+    { "source": "/dashboard", "destination": "/dashboard/", "permanent": false }
   ],
   "rewrites": [
     {

@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=VT323&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 1600px; height: 1000px; overflow: hidden; }
+    body {
+      background: #ece4d3;
+      font-family: "JetBrains Mono", ui-monospace, monospace;
+      color: #1c1a16;
+      padding: 56px 64px;
+    }
+    h1 { font-family: "VT323", monospace; font-size: 56px; line-height: 1; margin-bottom: 8px; }
+    .sub { font-size: 13px; letter-spacing: 0.18em; text-transform: uppercase; color: #6b6356; margin-bottom: 40px; }
+    .canvas { position: relative; width: 100%; height: 820px; }
+    .col { position: absolute; top: 0; bottom: 0; width: 280px; display: flex; flex-direction: column; gap: 16px; }
+    .col-zoom { left: 0; }
+    .col-edge { left: 360px; }
+    .col-otto { left: 720px; }
+    .col-cust { left: 1080px; }
+    .col-ai { left: 1320px; }
+    .label {
+      font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+      color: #6b6356; margin-bottom: 4px; padding-left: 4px;
+    }
+    .box {
+      background: #f6efde; border: 2px solid #1c1a16; box-shadow: 4px 4px 0 #b8ad94;
+      padding: 14px 16px; min-height: 64px;
+    }
+    .box h3 { font-family: "VT323", monospace; font-size: 22px; line-height: 1; margin-bottom: 4px; }
+    .box p { font-size: 11px; line-height: 1.5; color: #4a443a; }
+    .box.amber { border-color: #a87528; }
+    .box.amber h3 { color: #a87528; }
+    .box.danger { border-color: #a04a2c; }
+    svg.arrows { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+    .arrow-label { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; fill: #6b6356; font-family: "JetBrains Mono", monospace; }
+    .legend {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      display: flex; gap: 32px; font-size: 11px; color: #6b6356;
+    }
+    .legend strong { color: #1c1a16; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; }
+  </style>
+</head>
+<body>
+  <h1>otto · architecture</h1>
+  <div class="sub">data flow · zoom transcript → draft github pull request</div>
+
+  <div class="canvas">
+
+    <!-- Zoom side -->
+    <div class="col col-zoom">
+      <div class="label">zoom (customer's account)</div>
+      <div class="box">
+        <h3>cloud recording</h3>
+        <p>customer records a meeting on zoom. zoom auto-generates a transcript.</p>
+      </div>
+      <div class="box">
+        <h3>ai companion</h3>
+        <p>optional. generates summary if recording isn't enabled.</p>
+      </div>
+      <div class="box amber">
+        <h3>webhook + rest api</h3>
+        <p>recording.transcript_completed event fires. otto fetches transcript text via /v2 rest api with read-only oauth scopes.</p>
+      </div>
+    </div>
+
+    <!-- Edge / Vercel -->
+    <div class="col col-edge">
+      <div class="label">edge (vercel)</div>
+      <div class="box">
+        <h3>ottoagent.app</h3>
+        <p>marketing site, admin spa, legal pages, docs.</p>
+      </div>
+      <div class="box amber">
+        <h3>/zoom/webhook</h3>
+        <p>https proxy → convex. validates url challenge with hmac of secret token.</p>
+      </div>
+      <div class="box amber">
+        <h3>/auth/zoom/callback</h3>
+        <p>https proxy → convex. handles oauth code exchange.</p>
+      </div>
+    </div>
+
+    <!-- Otto / Convex backend -->
+    <div class="col col-otto">
+      <div class="label">otto backend (convex)</div>
+      <div class="box">
+        <h3>http actions</h3>
+        <p>verify hmac signatures on every webhook. hmac-signed oauth state.</p>
+      </div>
+      <div class="box">
+        <h3>per-team integrations</h3>
+        <p>encrypted oauth tokens, per-team teamId scoping enforced at every query.</p>
+      </div>
+      <div class="box">
+        <h3>parser + router</h3>
+        <p>extract code-shaped action items from transcript. route to repo by url-pattern + semantic match.</p>
+      </div>
+      <div class="box">
+        <h3>cron poll (5 min)</h3>
+        <p>backstop in case a webhook is dropped. same code path.</p>
+      </div>
+    </div>
+
+    <!-- Customer side -->
+    <div class="col col-cust">
+      <div class="label">customer's tools</div>
+      <div class="box amber">
+        <h3>github</h3>
+        <p>otto opens draft pr with diff + transcript excerpt + confidence.</p>
+      </div>
+      <div class="box">
+        <h3>slack</h3>
+        <p>low-confidence items go to a review queue instead of a pr.</p>
+      </div>
+      <div class="box">
+        <h3>otto admin spa</h3>
+        <p>customer reviews items, configures projects, manages retention.</p>
+      </div>
+    </div>
+
+    <!-- AI -->
+    <div class="col col-ai">
+      <div class="label">ai providers</div>
+      <div class="box">
+        <h3>cursor</h3>
+        <p>generates code diff.</p>
+      </div>
+      <div class="box">
+        <h3>anthropic</h3>
+        <p>parser + routing.</p>
+      </div>
+    </div>
+
+    <!-- Arrows -->
+    <svg class="arrows" viewBox="0 0 1600 820" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="#a87528" />
+        </marker>
+      </defs>
+      <!-- zoom -> edge webhook -->
+      <line x1="280" y1="240" x2="360" y2="160" stroke="#a87528" stroke-width="2" marker-end="url(#arrow)" />
+      <text x="294" y="195" class="arrow-label">webhook (signed)</text>
+      <!-- edge webhook -> otto -->
+      <line x1="640" y1="160" x2="720" y2="120" stroke="#a87528" stroke-width="2" marker-end="url(#arrow)" />
+      <text x="650" y="135" class="arrow-label">https proxy</text>
+      <!-- otto -> zoom rest -->
+      <line x1="720" y1="220" x2="280" y2="240" stroke="#a87528" stroke-width="2" marker-end="url(#arrow)" />
+      <text x="475" y="218" class="arrow-label">fetch transcript (oauth, read-only)</text>
+      <!-- otto -> github -->
+      <line x1="1000" y1="120" x2="1080" y2="100" stroke="#a87528" stroke-width="2" marker-end="url(#arrow)" />
+      <text x="1010" y="98" class="arrow-label">draft pr</text>
+      <!-- otto -> slack -->
+      <line x1="1000" y1="220" x2="1080" y2="200" stroke="#a87528" stroke-width="2" marker-end="url(#arrow)" />
+      <text x="1015" y="198" class="arrow-label">review msg</text>
+      <!-- otto -> ai -->
+      <line x1="1000" y1="320" x2="1320" y2="120" stroke="#a87528" stroke-width="2" marker-end="url(#arrow)" />
+      <text x="1110" y="218" class="arrow-label">parse + diff</text>
+    </svg>
+
+    <div class="legend">
+      <span><strong>read only</strong> on zoom · no audio or video stored · all secrets encrypted at rest</span>
+      <span><strong>auth</strong> oauth 2.0 admin-managed · hmac signed state · webhook hmac sha256 verify</span>
+      <span><strong>tenant isolation</strong> teamId scoping on every db row</span>
+    </div>
+  </div>
+</body>
+</html>

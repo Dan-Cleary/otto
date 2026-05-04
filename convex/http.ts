@@ -152,7 +152,7 @@ function zoomCallbackResponse(
   <h1 class="${ok ? "ok" : "err"}">${ok ? "zoom connected." : "couldn't connect zoom."}</h1>
   <p>${safeMsg}</p>
   ${safeDetail ? `<p style="opacity: .7">${safeDetail}</p>` : ""}
-  <a class="btn" href="/app/" target="_self">return to otto</a>
+  <a class="btn" href="/dashboard/" target="_self">return to otto</a>
 </div>
 <script>
   try { if (window.opener) { window.opener.postMessage({ type: "otto-zoom-${ok ? "connected" : "error"}" }, "*"); window.close(); } } catch {}

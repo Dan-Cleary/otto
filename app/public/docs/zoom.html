@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>otto · zoom integration · docs</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=VT323&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    :root {
+      --bg: #ece4d3; --panel: #e2d8c2; --cream: #f6efde;
+      --amber: #c89045; --amber-dim: #a87528; --hair: #b8ad94;
+      --ink: #1c1a16; --pencil: #6b6356;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body {
+      background: var(--bg); color: var(--ink);
+      font-family: "JetBrains Mono", ui-monospace, monospace;
+      font-size: 14px; line-height: 1.65;
+      padding: 32px 16px 96px;
+    }
+    .frame {
+      max-width: 760px; margin: 0 auto;
+      background: var(--cream); border: 1px solid var(--hair);
+      padding: 48px 56px;
+    }
+    nav.top {
+      max-width: 760px; margin: 0 auto 16px;
+      display: flex; align-items: center; gap: 12px;
+      padding: 8px 4px; font-size: 11px;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--pencil);
+    }
+    nav.top a { color: var(--pencil); text-decoration: none; }
+    nav.top a:hover { color: var(--ink); }
+    nav.top img { width: 24px; height: 24px; image-rendering: pixelated; }
+    nav.top .right { margin-left: auto; display: flex; gap: 18px; }
+    h1 {
+      font-family: "VT323", monospace; font-size: 56px;
+      line-height: 1; margin: 0 0 24px;
+    }
+    h2 {
+      font-family: "VT323", monospace; font-size: 28px;
+      margin: 32px 0 12px; line-height: 1.1;
+    }
+    h3 {
+      font-family: "JetBrains Mono", monospace; font-size: 12px;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--pencil); margin: 22px 0 8px;
+    }
+    p { margin: 0 0 12px; }
+    ul, ol { margin: 0 0 14px; padding-left: 24px; }
+    li { margin: 4px 0; }
+    a { color: var(--amber-dim); text-decoration: underline; text-underline-offset: 2px; }
+    a:hover { color: var(--ink); }
+    code {
+      font-family: "JetBrains Mono", monospace; font-size: 12.5px;
+      background: var(--bg); padding: 1px 6px; border: 1px solid var(--hair);
+    }
+    strong { font-weight: 600; }
+    hr { border: 0; border-top: 1px dashed var(--hair); margin: 32px 0; }
+    @media (max-width: 600px) {
+      .frame { padding: 28px 22px; }
+      h1 { font-size: 40px; }
+      h2 { font-size: 22px; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="top">
+    <a href="/"><img src="/favicon.svg" alt="otto" /></a>
+    <span>otto · docs · zoom</span>
+    <span class="right">
+      <a href="/legal/privacy">privacy</a>
+      <a href="/legal/terms">terms</a>
+    </span>
+  </nav>
+  <main class="frame">
+    <h1>zoom integration</h1>
+    <p>otto's zoom integration reads cloud-recording transcripts from connected zoom accounts so it can extract code-shaped action items and open draft pull requests on github. otto never joins meetings, never stores audio or video, and is read-only on zoom's side.</p>
+
+    <h2>add otto to your zoom account</h2>
+    <ol>
+      <li>sign in at <a href="https://ottoagent.app/login">ottoagent.app/login</a> with the email you want to administer otto under</li>
+      <li>go to the <strong>onboarding</strong> tab</li>
+      <li>step 03 — click <strong>connect with zoom</strong></li>
+      <li>you'll be sent to zoom's consent screen. review the requested scopes (all read-only) and click <strong>allow</strong></li>
+      <li>zoom redirects you back to otto. you should see <strong>connected as &lt;your email&gt;</strong> in step 03</li>
+    </ol>
+    <p>only zoom account admins can install this app — it is admin-managed and accesses recordings across the account.</p>
+
+    <h2>what otto reads</h2>
+    <ul>
+      <li><strong>cloud recording transcripts</strong> — the auto-generated text transcript only. otto does not download audio or video.</li>
+      <li><strong>ai companion meeting summaries</strong> — for meetings that were not cloud-recorded but had ai companion enabled.</li>
+      <li><strong>meeting metadata</strong> — title, host, scheduled time. used to attribute the source meeting in each draft pr.</li>
+      <li><strong>account user list</strong> — used only to know whose recordings to ingest. otto never modifies, creates, or deletes users.</li>
+    </ul>
+
+    <h2>scopes requested</h2>
+    <ul>
+      <li><code>cloud_recording:read:list_user_recordings:admin</code></li>
+      <li><code>cloud_recording:read:recording:admin</code></li>
+      <li><code>cloud_recording:read:meeting_transcript:admin</code></li>
+      <li><code>meeting:read:meeting:admin</code></li>
+      <li><code>meeting:read:summary:admin</code></li>
+      <li><code>user:read:list_users:admin</code></li>
+    </ul>
+    <p>no write scopes. otto cannot post messages, modify recordings, change settings, or take any action inside zoom.</p>
+
+    <h2>how transcripts flow into pull requests</h2>
+    <ol>
+      <li>zoom finishes generating a transcript and fires a <code>recording.transcript_completed</code> webhook to otto</li>
+      <li>otto fetches the transcript text and the meeting metadata</li>
+      <li>otto's parser pulls out code-shaped action items ("can we change x to y", "we should add a button for z")</li>
+      <li>each action item is routed to the right github repository based on your project configuration</li>
+      <li>otto opens a draft pull request with the proposed change, the original transcript excerpt, and a confidence score</li>
+      <li>low-confidence items go to a slack review queue instead of auto-firing a pr</li>
+    </ol>
+    <p>otto also runs a 5-minute polling backstop in case a webhook is dropped — same flow, just initiated by cron.</p>
+
+    <h2>data retention</h2>
+    <ul>
+      <li>transcripts are stored encrypted at rest in our convex database</li>
+      <li>retention follows the plan you choose under <strong>settings → retention</strong> in otto (default 30 days)</li>
+      <li>removing the integration deletes all stored transcripts associated with the integration within 24 hours</li>
+      <li>account-level deletion is available on request to <a href="mailto:support@ottoagent.app">support@ottoagent.app</a></li>
+    </ul>
+
+    <h2>remove otto from your zoom account</h2>
+    <ol>
+      <li>sign in to <a href="https://marketplace.zoom.us">marketplace.zoom.us</a> as a zoom account admin</li>
+      <li>go to <strong>manage → added apps</strong></li>
+      <li>find <strong>otto</strong> and click <strong>remove</strong></li>
+      <li>also disconnect inside otto: <strong>onboarding → step 03 → disconnect</strong></li>
+    </ol>
+    <p>once removed, otto immediately stops polling and discards stored zoom tokens. transcripts already ingested are retained per your retention policy unless you also request deletion.</p>
+
+    <h2>support</h2>
+    <p>questions, bug reports, or data deletion requests: <a href="mailto:support@ottoagent.app">support@ottoagent.app</a>.</p>
+  </main>
+</body>
+</html>

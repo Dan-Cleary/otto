@@ -12,7 +12,7 @@
   <meta property="og:title" content="otto — meetings in, draft prs out" />
   <meta
     property="og:description"
-    content="decide it in standup, see a draft pr by lunch. otto reads transcripts, pulls action items, opens prs. never auto-merges."
+    content="meeting ends. draft pr lands minutes later. otto reads transcripts, pulls action items, opens prs. never auto-merges."
   />
   <meta property="og:image" content="/og.png" />
   <meta property="og:url" content="https://ottoagent.app" />
@@ -442,7 +442,7 @@
       /* Top nav: hide the in-page links, keep the lockup + dashboard CTA. */
       .nav { padding: 16px 20px; }
       .nav-links { gap: 12px; font-size: 10px; }
-      .nav-links a:not([href="/app/"]) { display: none; }
+      .nav-links a:not([href="/login"]) { display: none; }
       .lockup .name { font-size: 22px; }
       .lockup img { width: 28px; height: 28px; }
       .version { font-size: 12px; padding: 1px 5px 0; }
@@ -512,7 +512,7 @@
       <a href="#how">how it works</a>
       <a href="#surfaces">surfaces</a>
       <a href="#voice">voice</a>
-      <a href="/app/">dashboard</a>
+      <a href="/login">dashboard</a>
     </span>
   </nav>
 
@@ -521,13 +521,13 @@
       <p class="eyebrow">your engineering agent <span class="sep">//</span> v0.4</p>
       <h1>otto joins your meetings.<br/><em>otto ships the changes.</em></h1>
       <p class="lede">
-        decide it in standup, see a draft pr by lunch. otto reads your
+        meeting ends, draft pr lands minutes later. otto reads your
         meeting transcripts, pulls out the code-shaped action items, and
         opens reviewable pull requests on the right repo.
         <strong>never auto-merges.</strong>
       </p>
       <div class="cta">
-        <a href="/app/" class="btn btn-primary">open dashboard</a>
+        <a href="/login" class="btn btn-primary">open dashboard</a>
         <a href="#how" class="btn btn-ghost">see how it works</a>
       </div>
     </div>
@@ -717,7 +717,7 @@
       a human.
     </p>
     <div class="cta" style="justify-content:center;">
-      <a href="/app/" class="btn btn-primary">open dashboard</a>
+      <a href="/login" class="btn btn-primary">open dashboard</a>
       <a href="#how" class="btn btn-ghost">how it works</a>
     </div>
   </section>

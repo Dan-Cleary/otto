@@ -33,11 +33,34 @@ export function SignOutButton() {
   );
 }
 
+function readFlowFromUrl(): "signIn" | "signUp" {
+  if (typeof window === "undefined") return "signIn";
+  const path = window.location.pathname;
+  if (path.startsWith("/signup")) return "signUp";
+  if (path.startsWith("/login")) return "signIn";
+  const sp = new URLSearchParams(window.location.search);
+  return sp.get("mode") === "signup" ? "signUp" : "signIn";
+}
+
+function setFlowInUrl(flow: "signIn" | "signUp") {
+  if (typeof window === "undefined") return;
+  const next = flow === "signUp" ? "/signup" : "/login";
+  if (window.location.pathname !== next) {
+    window.history.replaceState(null, "", next);
+  }
+}
+
 function SignInScreen() {
   const { signIn } = useAuthActions();
-  const [flow, setFlow] = useState<"signIn" | "signUp">("signIn");
+  const [flow, setFlow] = useState<"signIn" | "signUp">(readFlowFromUrl);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+
+  const switchFlow = (next: "signIn" | "signUp") => {
+    setFlow(next);
+    setFlowInUrl(next);
+    setErr(null);
+  };
 
   return (
     <div
@@ -110,10 +133,7 @@ function SignInScreen() {
             </button>
             <button
               type="button"
-              onClick={() => {
-                setFlow(flow === "signIn" ? "signUp" : "signIn");
-                setErr(null);
-              }}
+              onClick={() => switchFlow(flow === "signIn" ? "signUp" : "signIn")}
             >
               {flow === "signIn" ? "sign up instead" : "sign in instead"}
             </button>
