@@ -1,0 +1,503 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>otto · identity</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=VT323&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    :root {
+      --bg:        #ece4d3;
+      --panel:     #e2d8c2;
+      --cream:     #f6efde;
+      --amber:     #c89045;
+      --amber-dim: #a87528;
+      --hair:      #b8ad94;
+      --ink:       #1c1a16;
+      --pencil:    #6b6356;
+      --green:     #3d5440;
+      --red:       #a04a2c;
+      --display:   "VT323", monospace;
+      --mono:      "JetBrains Mono", ui-monospace, monospace;
+      --eyebrow:   0.18em;
+      --scan:      linear-gradient(rgba(28,26,22,0) 50%, rgba(28,26,22,0.025) 50%);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body {
+      font-family: var(--mono);
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--ink);
+      background: var(--bg);
+      background-image: var(--scan);
+      background-size: 100% 3px;
+      min-height: 100vh;
+      padding: 32px 16px 96px;
+    }
+
+    .frame {
+      max-width: 1080px;
+      margin: 0 auto;
+      background: var(--bg);
+      border: 2px solid var(--ink);
+      box-shadow: 6px 6px 0 var(--hair);
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 28px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--hair);
+    }
+    .lockup {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .lockup img { image-rendering: pixelated; }
+    .wordmark {
+      font-family: var(--display);
+      font-size: 36px;
+      line-height: 1;
+      letter-spacing: 0.04em;
+    }
+    .version {
+      display: inline-block;
+      background: var(--ink);
+      color: var(--cream);
+      font-family: var(--display);
+      font-size: 16px;
+      padding: 1px 8px 0;
+      letter-spacing: 0.05em;
+    }
+    .meta {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--pencil);
+      text-transform: uppercase;
+      letter-spacing: var(--eyebrow);
+    }
+
+    /* Hero */
+    .hero {
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      gap: 48px;
+      padding: 56px 28px;
+      border-bottom: 1px dashed var(--hair);
+      align-items: center;
+    }
+    .hero h1 {
+      font-family: var(--display);
+      font-size: 88px;
+      line-height: 0.95;
+      margin: 0 0 16px;
+      letter-spacing: 0.01em;
+    }
+    .hero .lede {
+      font-family: var(--mono);
+      font-size: 14px;
+      line-height: 1.55;
+      color: var(--ink);
+      max-width: 520px;
+    }
+    .hero .lede strong { color: var(--ink); font-weight: 500; }
+    .hero-sprite {
+      justify-self: end;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      padding: 24px;
+      background: var(--cream);
+      border: 1px solid var(--hair);
+    }
+    .hero-sprite img { image-rendering: pixelated; }
+    .hero-sprite .caption {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: var(--eyebrow);
+      text-transform: uppercase;
+      color: var(--pencil);
+    }
+
+    /* Section */
+    section {
+      padding: 40px 28px;
+      border-bottom: 1px dashed var(--hair);
+    }
+    section:last-of-type { border-bottom: 0; }
+    .eyebrow {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--pencil);
+      text-transform: uppercase;
+      letter-spacing: var(--eyebrow);
+      margin: 0 0 18px;
+    }
+    .eyebrow .sep { color: #8a8270; margin: 0 4px; }
+    h2 {
+      font-family: var(--display);
+      font-size: 32px;
+      margin: 0 0 18px;
+      line-height: 1;
+    }
+
+    /* Sprite states grid */
+    .states {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+    .state {
+      background: var(--cream);
+      border: 1px solid var(--hair);
+      padding: 24px 16px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+    .state img { image-rendering: pixelated; }
+    .state .name {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink);
+    }
+    .state .desc {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--pencil);
+      text-align: center;
+    }
+
+    /* Glyphs */
+    .glyphs {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 0;
+      border: 1px solid var(--hair);
+      background: var(--cream);
+    }
+    .glyph {
+      padding: 22px 14px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      border-right: 1px dashed var(--hair);
+      border-bottom: 1px dashed var(--hair);
+    }
+    .glyph:nth-child(5n) { border-right: 0; }
+    .glyph:nth-last-child(-n+5) { border-bottom: 0; }
+    .glyph img { image-rendering: pixelated; }
+    .glyph .label {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink);
+    }
+    .glyph .tone {
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--pencil);
+    }
+
+    /* Palette */
+    .palette {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+    }
+    .swatch {
+      background: var(--cream);
+      border: 1px solid var(--hair);
+    }
+    .swatch .chip {
+      height: 64px;
+      border-bottom: 1px solid var(--hair);
+    }
+    .swatch .meta-row {
+      padding: 10px 12px 12px;
+    }
+    .swatch .name {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink);
+    }
+    .swatch .hex {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--pencil);
+      margin-top: 2px;
+    }
+
+    /* Type stack */
+    .type-row {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: 24px;
+      padding: 18px 0;
+      border-bottom: 1px dashed var(--hair);
+      align-items: baseline;
+    }
+    .type-row:last-child { border-bottom: 0; }
+    .type-meta {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--pencil);
+      text-transform: uppercase;
+      letter-spacing: var(--eyebrow);
+    }
+    .type-row .display-xl { font-family: var(--display); font-size: 64px; line-height: 1; }
+    .type-row .display-md { font-family: var(--display); font-size: 32px; line-height: 1; }
+    .type-row .body { font-family: var(--mono); font-size: 13px; }
+    .type-row .small { font-family: var(--mono); font-size: 11px; letter-spacing: var(--eyebrow); text-transform: uppercase; color: var(--pencil); }
+
+    /* Daemon board (mini) */
+    .board {
+      background: var(--bg);
+      border: 1px solid var(--ink);
+      box-shadow: 4px 4px 0 var(--hair);
+    }
+    .board .head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--hair);
+    }
+    .board .head img { image-rendering: pixelated; }
+    .board .head .left { display: inline-flex; align-items: center; gap: 10px; }
+    .board .head .name { font-family: var(--display); font-size: 24px; line-height: 1; }
+    .board .head .pill {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--pencil);
+      letter-spacing: var(--eyebrow);
+      text-transform: uppercase;
+    }
+    .row {
+      display: grid;
+      grid-template-columns: 80px 1fr 140px 90px;
+      gap: 12px;
+      padding: 10px 16px;
+      border-bottom: 1px dashed var(--hair);
+      align-items: center;
+      font-size: 12px;
+    }
+    .row:last-child { border-bottom: 0; }
+    .row .id { font-family: var(--mono); color: var(--pencil); font-size: 11px; }
+    .row .repo { font-family: var(--mono); color: var(--pencil); font-size: 10px; }
+    .badge {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      text-align: right;
+    }
+    .badge.drafted { color: var(--green); }
+    .badge.routing { color: var(--amber); }
+    .badge.extract { color: var(--amber-dim); }
+    .badge.error   { color: var(--red); }
+
+    .footer {
+      padding: 24px 28px;
+      background: var(--panel);
+      border-top: 1px dashed var(--hair);
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--pencil);
+      text-transform: uppercase;
+      letter-spacing: var(--eyebrow);
+    }
+    .footer a { color: var(--amber-dim); text-decoration: underline; text-underline-offset: 2px; }
+
+    @media (max-width: 760px) {
+      .hero { grid-template-columns: 1fr; }
+      .hero h1 { font-size: 56px; }
+      .states, .palette { grid-template-columns: repeat(2, 1fr); }
+      .glyphs { grid-template-columns: repeat(2, 1fr); }
+      .glyph { border-right: 1px dashed var(--hair) !important; border-bottom: 1px dashed var(--hair) !important; }
+      .row { grid-template-columns: 60px 1fr 80px; }
+      .row .repo { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="frame">
+
+    <header class="header">
+      <div class="lockup">
+        <img src="./sprites/otter-idle.svg" width="48" height="48" alt="otto idle" />
+        <span class="wordmark">otto</span>
+        <span class="version">v0.4</span>
+      </div>
+      <div class="meta">identity <span style="margin:0 4px;color:#8a8270">//</span> daemon direction</div>
+    </header>
+
+    <section class="hero">
+      <div>
+        <h1>the daemon</h1>
+        <p class="lede">
+          otto is a long-running process that turns unstructured feedback —
+          widget reports, meeting notes, transcripts — into <strong>draft pull
+          requests</strong>. presented as a pixel otter holding whatever it&rsquo;s
+          working on. confident, brief, never apologetic. lowercase by default.
+        </p>
+      </div>
+      <div class="hero-sprite">
+        <img src="./sprites/otter-done.svg" width="192" height="192" alt="otto done" />
+        <span class="caption">&gt; done · 8×</span>
+      </div>
+    </section>
+
+    <section>
+      <p class="eyebrow">character <span class="sep">//</span> four states</p>
+      <h2>the otter</h2>
+      <div class="states">
+        <div class="state">
+          <img src="./sprites/otter-idle.svg" width="120" height="120" alt="idle" />
+          <div class="name">&gt; idle</div>
+          <div class="desc">watching the queue</div>
+        </div>
+        <div class="state">
+          <img src="./sprites/otter-thinking.svg" width="120" height="120" alt="thinking" />
+          <div class="name">&gt; thinking</div>
+          <div class="desc">processing feedback</div>
+        </div>
+        <div class="state">
+          <img src="./sprites/otter-done.svg" width="120" height="120" alt="done" />
+          <div class="name">&gt; done</div>
+          <div class="desc">draft pr is ready</div>
+        </div>
+        <div class="state">
+          <img src="./sprites/otter-error.svg" width="120" height="120" alt="error" />
+          <div class="name">&gt; error</div>
+          <div class="desc">needs a human</div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <p class="eyebrow">vocabulary <span class="sep">//</span> ten glyphs</p>
+      <h2>supporting glyphs</h2>
+      <div class="glyphs">
+        <div class="glyph"><img src="./glyphs/glyph-task.svg" width="40" height="40" alt="task" /><span class="label">task</span><span class="tone">work</span></div>
+        <div class="glyph"><img src="./glyphs/glyph-diff.svg" width="40" height="40" alt="diff" /><span class="label">diff</span><span class="tone">work</span></div>
+        <div class="glyph"><img src="./glyphs/glyph-branch.svg" width="40" height="40" alt="branch" /><span class="label">branch</span><span class="tone">work</span></div>
+        <div class="glyph"><img src="./glyphs/glyph-inbox.svg" width="40" height="40" alt="inbox" /><span class="label">inbox</span><span class="tone">sees</span></div>
+        <div class="glyph"><img src="./glyphs/glyph-notebook.svg" width="40" height="40" alt="notebook" /><span class="label">notebook</span><span class="tone">sees</span></div>
+        <div class="glyph"><img src="./glyphs/glyph-pebble.svg" width="40" height="40" alt="pebble" /><span class="label">pebble</span><span class="tone">otter</span></div>
+        <div class="glyph"><img src="./glyphs/glyph-ripple.svg" width="40" height="40" alt="ripple" /><span class="label">ripple</span><span class="tone">otter</span></div>
+        <div class="glyph"><img src="./glyphs/glyph-pawprint.svg" width="40" height="40" alt="pawprint" /><span class="label">pawprint</span><span class="tone">otter</span></div>
+        <div class="glyph"><img src="./glyphs/glyph-spinner.svg" width="40" height="40" alt="spinner" /><span class="label">spinner</span><span class="tone">status</span></div>
+        <div class="glyph"><img src="./glyphs/glyph-log.svg" width="40" height="40" alt="log" /><span class="label">log</span><span class="tone">status</span></div>
+      </div>
+    </section>
+
+    <section>
+      <p class="eyebrow">palette <span class="sep">//</span> paper + amber</p>
+      <h2>colors</h2>
+      <div class="palette">
+        <div class="swatch"><div class="chip" style="background:#ece4d3"></div><div class="meta-row"><div class="name">paper</div><div class="hex">#ece4d3</div></div></div>
+        <div class="swatch"><div class="chip" style="background:#e2d8c2"></div><div class="meta-row"><div class="name">paper deep</div><div class="hex">#e2d8c2</div></div></div>
+        <div class="swatch"><div class="chip" style="background:#f6efde"></div><div class="meta-row"><div class="name">cream</div><div class="hex">#f6efde</div></div></div>
+        <div class="swatch"><div class="chip" style="background:#1c1a16"></div><div class="meta-row"><div class="name">ink</div><div class="hex">#1c1a16</div></div></div>
+        <div class="swatch"><div class="chip" style="background:#6b6356"></div><div class="meta-row"><div class="name">pencil</div><div class="hex">#6b6356</div></div></div>
+        <div class="swatch"><div class="chip" style="background:#c89045"></div><div class="meta-row"><div class="name">amber</div><div class="hex">#c89045</div></div></div>
+        <div class="swatch"><div class="chip" style="background:#a87528"></div><div class="meta-row"><div class="name">amber dim</div><div class="hex">#a87528</div></div></div>
+        <div class="swatch"><div class="chip" style="background:#b8ad94"></div><div class="meta-row"><div class="name">amber deep</div><div class="hex">#b8ad94</div></div></div>
+        <div class="swatch"><div class="chip" style="background:#3d5440"></div><div class="meta-row"><div class="name">oxide</div><div class="hex">#3d5440</div></div></div>
+        <div class="swatch"><div class="chip" style="background:#a04a2c"></div><div class="meta-row"><div class="name">rust</div><div class="hex">#a04a2c</div></div></div>
+      </div>
+    </section>
+
+    <section>
+      <p class="eyebrow">type <span class="sep">//</span> vt323 + jetbrains mono</p>
+      <h2>typography</h2>
+      <div class="type-row">
+        <div class="type-meta">display · 64</div>
+        <div class="display-xl">the daemon is awake.</div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta">display · 32</div>
+        <div class="display-md">three drafts ready for review</div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta">body · 13</div>
+        <div class="body">otto: i drafted this from widget feedback. the export button on the orders dashboard fires even with zero rows selected. added a disabled state and an aria-disabled hint. tests pass locally.</div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta">eyebrow · 11</div>
+        <div class="small">queue <span style="color:#8a8270">//</span> 3 in queue · 11 today</div>
+      </div>
+    </section>
+
+    <section>
+      <p class="eyebrow">surfaces <span class="sep">//</span> daemon board (mini)</p>
+      <h2>the queue</h2>
+      <div class="board">
+        <div class="head">
+          <div class="left">
+            <img src="./sprites/otter-idle.svg" width="48" height="48" alt="otto" />
+            <span class="name">otto</span>
+          </div>
+          <span class="pill">3 in queue · 11 today</span>
+        </div>
+        <div class="row">
+          <span class="id">#284</span>
+          <span>add disabled state to orders export button</span>
+          <span class="repo">acme/web</span>
+          <span class="badge drafted">drafted</span>
+        </div>
+        <div class="row">
+          <span class="id">#283</span>
+          <span>fix sticky header overlap on settings page</span>
+          <span class="repo">acme/web</span>
+          <span class="badge routing">routing</span>
+        </div>
+        <div class="row">
+          <span class="id">#282</span>
+          <span>extract metric definitions from meeting notes</span>
+          <span class="repo">acme/docs</span>
+          <span class="badge extract">extract</span>
+        </div>
+        <div class="row">
+          <span class="id">#281</span>
+          <span>could not route — unknown component reference</span>
+          <span class="repo">acme/api</span>
+          <span class="badge error">error</span>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <span>otto · daemon direction · v0.4</span>
+      <span><a href="/app/">↳ open dashboard</a></span>
+    </footer>
+
+  </main>
+</body>
+</html>

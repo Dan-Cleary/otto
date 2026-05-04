@@ -1,0 +1,9 @@
+node_modules
+dist
+widget/dist
+app/public/otto.js
+.env
+.env.local
+.convex
+.gstack/
+.vercel

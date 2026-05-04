@@ -1,0 +1,553 @@
+@import "./design.css";
+
+:root {
+  font-family: var(--otto-font-mono);
+  color: var(--otto-ink);
+  background: var(--otto-bg);
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--otto-bg);
+  background-image: var(--otto-scanlines);
+  background-size: 100% 3px;
+  min-height: 100vh;
+  font-size: var(--otto-text-body);
+  line-height: 1.6;
+}
+
+/* Otto-native dashboard frame: hard ink border with offset paper-deep shadow. */
+.shell {
+  max-width: 1100px;
+  margin: 32px auto 64px;
+  padding: 0;
+  background: var(--otto-bg);
+  border: var(--otto-border-strong);
+  box-shadow: var(--otto-shadow-card);
+}
+
+/* Top bar — paper-deep panel with hairline divider, lockup on the left. */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px var(--otto-space-6);
+  background: var(--otto-panel);
+  border-bottom: var(--otto-border-hair);
+}
+
+/* Tabs row — same paper-deep tone, dashed divider underneath. */
+.tabs {
+  display: flex;
+  gap: 0;
+  padding: 0 var(--otto-space-6);
+  background: var(--otto-panel);
+  border-bottom: var(--otto-border-dashed);
+}
+.tabs button {
+  background: none;
+  border: none;
+  padding: 10px 14px;
+  cursor: pointer;
+  font-family: var(--otto-font-mono);
+  font-size: var(--otto-text-xs);
+  font-weight: 500;
+  color: var(--otto-pencil);
+  text-transform: uppercase;
+  letter-spacing: var(--otto-tracking-eyebrow);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color var(--otto-dur-fast) var(--otto-ease);
+}
+.tabs button:hover { color: var(--otto-ink); }
+.tabs button.active {
+  color: var(--otto-ink);
+  border-bottom-color: var(--otto-ink);
+}
+
+/* Content area — sits inside the framed shell. */
+.shell > :not(.topbar):not(.tabs) {
+  padding: var(--otto-space-6);
+}
+
+/* Headings — VT323 display for h1, mono caps eyebrow for h2. */
+h1 {
+  font-family: var(--otto-font-display);
+  font-weight: 400;
+  font-size: var(--otto-text-h2);
+  line-height: 1;
+  letter-spacing: 0.01em;
+  margin: 0 0 var(--otto-space-4);
+  color: var(--otto-ink);
+}
+h2 {
+  font-family: var(--otto-font-mono);
+  font-size: var(--otto-text-xs);
+  font-weight: 500;
+  color: var(--otto-pencil);
+  text-transform: uppercase;
+  letter-spacing: var(--otto-tracking-eyebrow);
+  margin: var(--otto-space-6) 0 var(--otto-space-3);
+}
+
+/* Tables — daybook rows. Dashed amber-deep dividers, mono labels. */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--otto-font-mono);
+  font-size: var(--otto-text-body);
+}
+th, td {
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: var(--otto-border-dashed);
+  vertical-align: middle;
+}
+th {
+  font-weight: 500;
+  color: var(--otto-pencil);
+  background: transparent;
+  font-size: var(--otto-text-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--otto-tracking-eyebrow);
+  border-bottom: var(--otto-border-hair);
+}
+tr:hover td {
+  background: rgba(184, 173, 148, 0.18);
+}
+
+/* Status — small square indicator + label, color paired with shape. */
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--otto-text-small);
+  color: var(--otto-ink);
+  white-space: nowrap;
+  text-transform: lowercase;
+  letter-spacing: var(--otto-tracking-state);
+}
+.status::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background: var(--otto-pencil);
+  flex-shrink: 0;
+}
+.status.s-parsed::before    { background: var(--otto-pencil); }
+.status.s-queued::before    { background: var(--otto-amber-dim); }
+.status.s-approved::before  { background: var(--otto-amber); }
+.status.s-fired::before     { background: var(--otto-amber); animation: otto-blink 1.4s var(--otto-ease) infinite; }
+.status.s-pr_opened::before { background: var(--otto-green); }
+.status.s-failed::before    { background: var(--otto-red); }
+.status.s-rejected::before  { background: #8a8270; }
+
+@keyframes otto-blink {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.45; }
+}
+
+/* Forms — square edges, ink border, paper-deep field. */
+input, select, textarea, button {
+  font: var(--otto-text-body) var(--otto-font-mono);
+  padding: 7px 10px;
+  border: 1px solid var(--otto-amber-deep);
+  border-radius: var(--otto-radius);
+  background: var(--otto-cream);
+  color: var(--otto-ink);
+  transition:
+    border-color var(--otto-dur-fast) var(--otto-ease),
+    box-shadow var(--otto-dur-fast) var(--otto-ease);
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--otto-ink);
+  box-shadow: 0 0 0 2px var(--otto-amber);
+}
+button {
+  cursor: pointer;
+  background: var(--otto-cream);
+  text-transform: uppercase;
+  letter-spacing: var(--otto-tracking-eyebrow);
+  font-size: var(--otto-text-xs);
+  font-weight: 500;
+}
+button:hover { border-color: var(--otto-ink); }
+button.primary {
+  background: var(--otto-ink);
+  color: var(--otto-cream);
+  border-color: var(--otto-ink);
+}
+button.primary:hover { background: var(--otto-amber-dim); border-color: var(--otto-amber-dim); }
+button.primary:disabled { opacity: 0.5; cursor: default; }
+button.danger {
+  background: transparent;
+  color: var(--otto-red);
+  border-color: var(--otto-amber-deep);
+}
+button.danger:hover { background: rgba(160, 74, 44, 0.08); border-color: var(--otto-red); }
+
+.row { display: flex; gap: var(--otto-space-2); align-items: center; }
+
+.card {
+  background: var(--otto-cream);
+  border: var(--otto-border-hair);
+  border-radius: var(--otto-radius);
+  padding: var(--otto-space-5);
+  margin-bottom: var(--otto-space-3);
+}
+
+code {
+  font-family: var(--otto-font-mono);
+  font-size: var(--otto-text-small);
+  background: var(--otto-cream);
+  border: var(--otto-border-hair);
+  padding: 1px 5px;
+  border-radius: var(--otto-radius);
+}
+
+a {
+  color: var(--otto-amber-dim);
+  text-decoration: underline;
+  text-decoration-color: var(--otto-amber-deep);
+  text-underline-offset: 2px;
+}
+a:hover { color: var(--otto-ink); text-decoration-color: var(--otto-ink); }
+
+.muted { color: var(--otto-pencil); }
+.subtle { color: #8a8270; }
+
+.empty {
+  color: var(--otto-pencil);
+  padding: var(--otto-space-12) var(--otto-space-6);
+  text-align: center;
+  border: var(--otto-border-dashed);
+  background: var(--otto-cream);
+}
+.empty .otto-sprite { margin-bottom: var(--otto-space-3); }
+.empty p { margin: 0; }
+.empty p + p { margin-top: var(--otto-space-2); font-size: var(--otto-text-small); }
+
+/* Editorial: section header with // separator. */
+.section-label {
+  font-family: var(--otto-font-mono);
+  font-size: var(--otto-text-xs);
+  font-weight: 500;
+  color: var(--otto-pencil);
+  text-transform: uppercase;
+  letter-spacing: var(--otto-tracking-eyebrow);
+  margin: var(--otto-space-6) 0 var(--otto-space-3);
+}
+.section-label .sep {
+  color: #8a8270;
+  margin: 0 var(--otto-space-1);
+}
+
+/* Stat cards — VT323 number, mono caps eyebrow, on cream paper. */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--otto-space-3);
+  margin-bottom: var(--otto-space-6);
+}
+.stat-card {
+  background: var(--otto-cream);
+  border: var(--otto-border-hair);
+  padding: var(--otto-space-4) var(--otto-space-5) var(--otto-space-5);
+  position: relative;
+}
+.stat-card .stat-label {
+  font-family: var(--otto-font-mono);
+  font-size: var(--otto-text-2xs);
+  font-weight: 500;
+  color: var(--otto-pencil);
+  text-transform: uppercase;
+  letter-spacing: var(--otto-tracking-eyebrow);
+  margin-bottom: var(--otto-space-3);
+}
+.stat-card .stat-value {
+  font-family: var(--otto-font-display);
+  font-weight: 400;
+  font-size: 56px;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  color: var(--otto-ink);
+}
+.stat-card .stat-caption {
+  font-family: var(--otto-font-mono);
+  font-size: var(--otto-text-xs);
+  color: #8a8270;
+  margin-top: var(--otto-space-3);
+}
+.stat-card-accent {
+  background: var(--otto-bg);
+  border: 1px solid var(--otto-ink);
+}
+.stat-card-accent .stat-value {
+  color: var(--otto-amber-dim);
+}
+
+/* Otto signature — VT323 with a small offset. */
+.otto-signature {
+  font-family: var(--otto-font-display);
+  font-size: 26px;
+  color: var(--otto-pencil);
+  display: inline-block;
+}
+
+/* ── Onboarding ────────────────────────────────────────────── */
+
+.onboarding {
+  display: flex;
+  flex-direction: column;
+  gap: var(--otto-space-6);
+  max-width: 760px;
+}
+
+.onboarding-hero {
+  display: flex;
+  align-items: center;
+  gap: var(--otto-space-5);
+}
+.onboarding-hero h1 {
+  margin: 0 0 var(--otto-space-2);
+  font-size: var(--otto-text-h2);
+}
+.onboarding-lede {
+  margin: 0;
+  font-family: var(--otto-font-mono);
+  font-size: var(--otto-text-body);
+  color: var(--otto-pencil);
+  line-height: 1.6;
+  max-width: 560px;
+}
+
+/* eyebrow utility (used inside .onboarding for consistency) */
+.otto-eyebrow {
+  font-family: var(--otto-font-mono);
+  font-size: var(--otto-text-xs);
+  font-weight: 500;
+  color: var(--otto-pencil);
+  text-transform: uppercase;
+  letter-spacing: var(--otto-tracking-eyebrow);
+}
+.otto-eyebrow .sep { color: #8a8270; margin: 0 var(--otto-space-1); }
+
+/* progress strip */
+.progress-strip {
+  background: var(--otto-cream);
+  border: var(--otto-border-hair);
+  padding: var(--otto-space-4) var(--otto-space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--otto-space-3);
+}
+.progress-count {
+  display: flex;
+  align-items: baseline;
+  gap: var(--otto-space-1);
+}
+.progress-num {
+  font-family: var(--otto-font-display);
+  font-size: 40px;
+  line-height: 1;
+  color: var(--otto-amber-dim);
+}
+.progress-of {
+  font-family: var(--otto-font-display);
+  font-size: 22px;
+  color: var(--otto-pencil);
+}
+.progress-cells {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  border: var(--otto-border-hair);
+}
+.progress-cell {
+  padding: 10px 12px;
+  border-right: var(--otto-border-dashed);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: var(--otto-cream);
+}
+.progress-cell:last-child { border-right: 0; }
+.progress-cell .cell-name {
+  font-family: var(--otto-font-mono);
+  font-size: var(--otto-text-xs);
+  color: var(--otto-ink);
+  letter-spacing: var(--otto-tracking-eyebrow);
+  text-transform: uppercase;
+}
+.progress-cell .cell-status {
+  font-family: var(--otto-font-mono);
+  font-size: var(--otto-text-2xs);
+  color: var(--otto-pencil);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.progress-cell.is-ready    { background: rgba(61, 84, 64, 0.08); }
+.progress-cell.is-ready .cell-status { color: var(--otto-green); }
+.progress-cell.is-needed .cell-status { color: var(--otto-amber-dim); }
+
+/* step card */
+.step {
+  background: var(--otto-cream);
+  border: var(--otto-border-hair);
+  display: flex;
+  flex-direction: column;
+}
+.step.is-ready { border-left: 3px solid var(--otto-green); }
+
+.step-head {
+  display: grid;
+  grid-template-columns: auto auto 1fr auto;
+  align-items: center;
+  gap: var(--otto-space-3);
+  padding: var(--otto-space-4) var(--otto-space-5);
+  border-bottom: var(--otto-border-dashed);
+  background: var(--otto-bg);
+}
+.step-num {
+  font-family: var(--otto-font-display);
+  font-size: 28px;
+  line-height: 1;
+  color: var(--otto-pencil);
+}
+.step-head h3 {
+  margin: 0;
+  font-family: var(--otto-font-display);
+  font-size: 24px;
+  line-height: 1;
+  color: var(--otto-ink);
+}
+.step-pill {
+  font-family: var(--otto-font-mono);
+  font-size: var(--otto-text-2xs);
+  letter-spacing: var(--otto-tracking-eyebrow);
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border: 1px solid var(--otto-amber-deep);
+  background: var(--otto-cream);
+  color: var(--otto-pencil);
+}
+.step-pill.is-ready {
+  color: var(--otto-green);
+  border-color: var(--otto-green);
+}
+.step-pill.is-needed {
+  color: var(--otto-amber-dim);
+  border-color: var(--otto-amber-dim);
+}
+.step-pill.is-checking { color: var(--otto-pencil); }
+
+.step-body {
+  padding: var(--otto-space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--otto-space-4);
+}
+.step-body p {
+  margin: 0;
+  line-height: 1.65;
+  color: var(--otto-ink);
+}
+.step-body code {
+  font-size: var(--otto-text-small);
+  background: var(--otto-bg);
+}
+
+/* code block with copy */
+.codeblock {
+  border: var(--otto-border-hair);
+  background: var(--otto-bg);
+}
+.codeblock-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  background: var(--otto-panel);
+  border-bottom: var(--otto-border-dashed);
+}
+.codeblock pre {
+  margin: 0;
+  padding: var(--otto-space-3) var(--otto-space-4);
+  font-family: var(--otto-font-mono);
+  font-size: var(--otto-text-small);
+  color: var(--otto-ink);
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-x: auto;
+}
+.copy-btn {
+  font-family: var(--otto-font-mono);
+  font-size: var(--otto-text-2xs);
+  letter-spacing: var(--otto-tracking-eyebrow);
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border: 1px solid var(--otto-amber-deep);
+  background: var(--otto-cream);
+  color: var(--otto-pencil);
+  cursor: pointer;
+  transition: all var(--otto-dur-fast) var(--otto-ease);
+}
+.copy-btn:hover {
+  color: var(--otto-ink);
+  border-color: var(--otto-ink);
+}
+
+/* hint row */
+.hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: var(--otto-space-3) var(--otto-space-4);
+  background: var(--otto-bg);
+  border-left: 2px solid var(--otto-amber);
+  font-size: var(--otto-text-small);
+  color: var(--otto-pencil);
+  line-height: 1.55;
+}
+.hint img { margin-top: 3px; flex-shrink: 0; }
+.hint code { font-size: 11px; }
+
+/* per-step verify footer */
+.step-verify {
+  display: flex;
+  align-items: center;
+  gap: var(--otto-space-3);
+  padding: 10px var(--otto-space-5);
+  border-top: var(--otto-border-dashed);
+  background: var(--otto-bg);
+  font-family: var(--otto-font-mono);
+  font-size: var(--otto-text-xs);
+  color: var(--otto-pencil);
+}
+
+.onboarding-footer {
+  margin-top: var(--otto-space-2);
+  padding: var(--otto-space-4) var(--otto-space-5);
+  background: var(--otto-panel);
+  border: var(--otto-border-hair);
+  display: flex;
+  flex-direction: column;
+  gap: var(--otto-space-2);
+}
+
+@media (max-width: 600px) {
+  .progress-cells { grid-template-columns: repeat(2, 1fr); }
+  .progress-cell:nth-child(2) { border-right: 0; }
+  .step-head { grid-template-columns: auto 1fr auto; }
+  .step-head .otto-glyph { display: none; }
+}
+
+/* Italic display word kept as alias. */
+.display-italic {
+  font-family: var(--otto-font-display);
+  font-style: italic;
+  font-weight: 400;
+}

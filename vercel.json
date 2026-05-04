@@ -1,0 +1,35 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "npm install --no-audit --no-fund && cd app && npm install --no-audit --no-fund && npm run build",
+  "outputDirectory": "app/dist",
+  "installCommand": "true",
+  "framework": null,
+  "cleanUrls": true,
+  "redirects": [
+    { "source": "/app", "destination": "/app/", "permanent": false }
+  ],
+  "rewrites": [
+    {
+      "source": "/auth/zoom/callback",
+      "destination": "https://resolute-lemming-209.convex.site/auth/zoom/callback"
+    },
+    {
+      "source": "/zoom/webhook",
+      "destination": "https://resolute-lemming-209.convex.site/zoom/webhook"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(otto|_brand)/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=86400, immutable" }
+      ]
+    },
+    {
+      "source": "/.well-known/security.txt",
+      "headers": [
+        { "key": "Content-Type", "value": "text/plain; charset=utf-8" }
+      ]
+    }
+  ]
+}
