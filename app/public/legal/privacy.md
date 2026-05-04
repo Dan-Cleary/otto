@@ -74,7 +74,7 @@ We never receive payment card numbers; billing is handled by Stripe.
 ## Sub-processors
 
 - **Convex.** Backend hosting (database, functions, file storage, auth). Governed by [Convex's privacy policy](https://www.convex.dev/legal/privacy).
-- **OpenAI.** Used to extract action items from feedback / transcripts and to embed text for routing. Governed by [OpenAI's privacy policy](https://openai.com/policies/privacy-policy/). Otto sends only the relevant feedback text + (where applicable) transcript excerpts; we use API access with zero data retention enabled.
+- **OpenAI.** Used to extract action items from feedback / transcripts and to embed text for routing. Governed by [OpenAI's privacy policy](https://openai.com/policies/privacy-policy/). Otto sends only the relevant feedback text + (where applicable) transcript excerpts. Data handling follows OpenAI's API data usage policy: API content is not used to train OpenAI's models, and is retained per OpenAI's standard API retention period.
 - **Cursor.** Used to draft pull requests via Cursor cloud agents. Governed by [Cursor's privacy policy](https://cursor.com/privacy).
 - **Granola.** Used (only if you connect it) to pull meeting notes you have already created. Governed by [Granola's privacy policy](https://granola.ai/privacy).
 - **Zoom.** Used (only if you connect it) to pull cloud-recording transcripts. Governed by [Zoom's privacy policy](https://zoom.us/privacy).

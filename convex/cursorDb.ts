@@ -129,6 +129,7 @@ export const markFired = internalMutation({
     cursorAgentId: v.string(),
   },
   handler: async (ctx, { itemId, cursorRunId, cursorAgentId }) => {
+    const item = await ctx.db.get(itemId);
     await ctx.db.patch(itemId, {
       status: "fired",
       cursorRunId,
@@ -140,6 +141,7 @@ export const markFired = internalMutation({
       payload: { cursorRunId, cursorAgentId },
       actor: "system",
       at: Date.now(),
+      teamId: item?.teamId,
     });
   },
 });
@@ -147,6 +149,7 @@ export const markFired = internalMutation({
 export const markPrOpened = internalMutation({
   args: { itemId: v.id("items"), prUrl: v.string() },
   handler: async (ctx, { itemId, prUrl }) => {
+    const item = await ctx.db.get(itemId);
     await ctx.db.patch(itemId, { status: "pr_opened", prUrl });
     await ctx.db.insert("auditLog", {
       itemId,
@@ -154,6 +157,7 @@ export const markPrOpened = internalMutation({
       payload: { prUrl },
       actor: "system",
       at: Date.now(),
+      teamId: item?.teamId,
     });
   },
 });
@@ -161,6 +165,7 @@ export const markPrOpened = internalMutation({
 export const markFailed = internalMutation({
   args: { itemId: v.id("items"), reason: v.string() },
   handler: async (ctx, { itemId, reason }) => {
+    const item = await ctx.db.get(itemId);
     await ctx.db.patch(itemId, { status: "failed", failureReason: reason });
     await ctx.db.insert("auditLog", {
       itemId,
@@ -168,6 +173,7 @@ export const markFailed = internalMutation({
       payload: { reason },
       actor: "system",
       at: Date.now(),
+      teamId: item?.teamId,
     });
   },
 });

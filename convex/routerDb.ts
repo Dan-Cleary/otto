@@ -10,6 +10,11 @@ export const getItem = internalQuery({
   handler: (ctx, { itemId }) => ctx.db.get(itemId),
 });
 
+export const getRepo = internalQuery({
+  args: { repoId: v.id("repos") },
+  handler: (ctx, { repoId }) => ctx.db.get(repoId),
+});
+
 export const applyRoute = internalMutation({
   args: {
     itemId: v.id("items"),
@@ -122,6 +127,7 @@ export const reject = internalMutation({
   args: { itemId: v.id("items"), actor: v.string() },
   handler: async (ctx, { itemId, actor }) => {
     const item = await ctx.db.get(itemId);
+    if (!item) return;
     await ctx.db.patch(itemId, { status: "rejected" });
     await ctx.db.insert("auditLog", {
       itemId,
@@ -129,7 +135,7 @@ export const reject = internalMutation({
       payload: {},
       actor,
       at: Date.now(),
-      teamId: item?.teamId,
+      teamId: item.teamId,
     });
   },
 });

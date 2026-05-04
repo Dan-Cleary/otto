@@ -107,6 +107,7 @@ function SignInScreen() {
         >
           <input
             name="email"
+            aria-label="email"
             placeholder="email"
             type="email"
             autoComplete="email"
@@ -115,6 +116,7 @@ function SignInScreen() {
           />
           <input
             name="password"
+            aria-label="password"
             placeholder="password"
             type="password"
             autoComplete={flow === "signIn" ? "current-password" : "new-password"}

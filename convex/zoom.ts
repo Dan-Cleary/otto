@@ -235,10 +235,11 @@ export const getOAuthConnectUrl = action({
 
     const clientId = process.env.ZOOM_OAUTH_CLIENT_ID;
     const redirectUri = process.env.ZOOM_OAUTH_REDIRECT_URI;
-    if (!clientId || !redirectUri) {
+    const stateSecret = process.env[STATE_SECRET_KEY];
+    if (!clientId || !redirectUri || !stateSecret) {
       return {
         error:
-          "Otto's Zoom OAuth app isn't configured. Operator: set ZOOM_OAUTH_CLIENT_ID + ZOOM_OAUTH_REDIRECT_URI in convex env.",
+          "Otto's Zoom OAuth app isn't configured. Operator: set ZOOM_OAUTH_CLIENT_ID + ZOOM_OAUTH_REDIRECT_URI + OAUTH_STATE_SECRET in convex env.",
       };
     }
 
@@ -499,10 +500,10 @@ async function refreshOAuth(
 const STATE_SECRET_KEY = "OAUTH_STATE_SECRET";
 
 async function getStateKey(): Promise<CryptoKey> {
-  const secret =
-    process.env[STATE_SECRET_KEY] ??
-    process.env.CONVEX_DEPLOYMENT ??
-    "otto-dev-fallback";
+  const secret = process.env[STATE_SECRET_KEY];
+  if (!secret) {
+    throw new Error(`${STATE_SECRET_KEY} env var is required`);
+  }
   return crypto.subtle.importKey(
     "raw",
     new TextEncoder().encode(secret),
@@ -532,7 +533,12 @@ export async function verifyState(
 > {
   const [b64, sig] = state.split(".");
   if (!b64 || !sig) return null;
-  const key = await getStateKey();
+  let key: CryptoKey;
+  try {
+    key = await getStateKey();
+  } catch {
+    return null;
+  }
   const sigBytes = fromB64url(sig);
   // Copy into a fresh ArrayBuffer so the type system is happy (Uint8Array
   // backed by SharedArrayBuffer would fail BufferSource).

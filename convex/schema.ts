@@ -161,7 +161,7 @@ export default defineSchema({
     .vectorIndex("by_embedding", {
       vectorField: "embedding",
       dimensions: EMBEDDING_DIM,
-      filterFields: ["enabled"],
+      filterFields: ["enabled", "teamId"],
     }),
 
   // Projects group one or more repos and own the routing rules for

@@ -161,17 +161,26 @@ async function verifyDraft(prUrl: string): Promise<boolean> {
     // Without a token we cannot verify — fail closed.
     return false;
   }
-  const res = await fetch(
-    `https://api.github.com/repos/${owner}/${repo}/pulls/${number}`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: "application/vnd.github+json",
-        "User-Agent": "otto",
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 15_000);
+  try {
+    const res = await fetch(
+      `https://api.github.com/repos/${owner}/${repo}/pulls/${number}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/vnd.github+json",
+          "User-Agent": "otto",
+        },
+        signal: ctrl.signal,
       },
-    },
-  );
-  if (!res.ok) return false;
-  const body: any = await res.json();
-  return body.draft === true;
+    );
+    if (!res.ok) return false;
+    const body: any = await res.json();
+    return body.draft === true;
+  } catch {
+    return false;
+  } finally {
+    clearTimeout(timer);
+  }
 }
