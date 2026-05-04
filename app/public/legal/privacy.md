@@ -48,7 +48,9 @@ When a teammate corrects Otto's repo routing in the Slack review queue, we store
 
 ### Retention
 
-Source content is retained for the duration specified by your plan: 90 days on Free, 1 year on Solo, 5 years on Pro. After retention expires, records are deleted automatically. Account deletion deletes all associated source content immediately.
+Source content is retained for the duration specified by your plan: 90 days on Free, 1 year on Solo, 5 years on Pro. After retention expires, source content is removed from application-controlled storage on a daily sweep. Account deletion removes all associated source content from application-controlled storage within 24 hours.
+
+Encrypted backups and infrastructure logs (held by our hosting provider) may retain copies for up to 30 days after deletion before they cycle out of backup retention. We never read these backups except to restore the service after an incident.
 
 ## Account and admin data
 
@@ -69,7 +71,7 @@ We never receive payment card numbers; billing is handled by Stripe.
 - We do not feed your transcripts or feedback into model training.
 - We do not sell or rent any of the data described above.
 - We do not call the Granola, Zoom, or Slack APIs beyond what you have authorized.
-- We do not retain end-user IP addresses from widget submissions beyond request processing.
+- End-user IP addresses from widget submissions are not stored in application-controlled storage; they may briefly appear in our hosting provider's request logs and are cycled out per that provider's standard log retention.
 
 ## Sub-processors
 
@@ -81,7 +83,7 @@ We never receive payment card numbers; billing is handled by Stripe.
 - **Slack.** Used (only if you connect it) to deliver review-queue messages and accept approvals. Governed by [Slack's privacy policy](https://slack.com/trust/privacy).
 - **GitHub.** Used to open draft pull requests on the repos you register. Governed by [GitHub's privacy statement](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement).
 - **Stripe.** Payment processing for paid plans. Governed by [Stripe's privacy policy](https://stripe.com/privacy).
-- **Resend.** Transactional email (invites, notifications).
+- **Resend.** Transactional email (invites, notifications). Governed by [Resend's privacy policy](https://resend.com/legal/privacy-policy).
 - **Vercel.** Hosting for the marketing site and admin app. Governed by [Vercel's privacy policy](https://vercel.com/legal/privacy-policy).
 
 ## Your rights

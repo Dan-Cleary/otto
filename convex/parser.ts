@@ -39,7 +39,10 @@ function isValidParsedItem(x: unknown): x is ParsedItem {
     o.description.length <= 2000 &&
     typeof o.quotedContext === "string" &&
     o.quotedContext.length <= 4000 &&
-    (o.repoCandidate === null || typeof o.repoCandidate === "string") &&
+    (o.repoCandidate === null ||
+      (typeof o.repoCandidate === "string" &&
+        o.repoCandidate.length > 0 &&
+        o.repoCandidate.length <= 256)) &&
     typeof o.confidence === "number" &&
     o.confidence >= 0 &&
     o.confidence <= 1 &&
@@ -56,12 +59,20 @@ export const parse = internalAction({
     });
     if (!event) throw new Error(`ingestEvent ${ingestEventId} not found`);
 
+    if (!event.teamId) {
+      // Orphan event — happens during the team migration window. Skip
+      // before doing any LLM work so we don't burn tokens on rows the
+      // migration will re-process anyway.
+      return;
+    }
+
     const userInput = formatInput(event);
 
     const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
     const completion = await client.chat.completions.create({
       model: "gpt-4o-mini",
       response_format: { type: "json_object" },
+      max_tokens: 2048,
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
         {
@@ -84,12 +95,6 @@ export const parse = internalAction({
     const parsed: { items: ParsedItem[] } = {
       items: candidateItems.filter(isValidParsedItem),
     };
-
-    if (!event.teamId) {
-      // Orphan event — happens during the team migration window. Skip
-      // and audit; the migration script will reattach the event.
-      return;
-    }
 
     await ctx.runMutation(internal.parserDb.persistItems, {
       ingestEventId,
@@ -123,11 +128,13 @@ function formatInput(event: {
       .join("\n\n");
   }
   if (event.sourceType === "zoom") {
-    const { topic, startedAt, transcript, hostEmail } = event.payload ?? {};
+    // Don't ship hostEmail to OpenAI — it's PII we don't need for
+    // extracting code-shaped action items. Host attribution lives in
+    // the meeting metadata we already store separately.
+    const { topic, startedAt, transcript } = event.payload ?? {};
     return [
       `Source: zoom`,
       `Meeting: ${topic ?? "untitled"}`,
-      hostEmail ? `Host: ${hostEmail}` : "",
       startedAt ? `When: ${startedAt}` : "",
       transcript ? `Transcript:\n${transcript.slice(0, 12000)}` : "",
     ]

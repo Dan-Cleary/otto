@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { action, internalAction } from "./_generated/server";
 import { internal } from "./_generated/api";
-import { requireAdminAction } from "./auth";
+import { requireAuthAction } from "./auth";
 
 const GRANOLA_API_BASE = "https://api.granola.ai/v1";
 const PAGE_LIMIT = 50;
@@ -143,7 +143,7 @@ export const saveApiKey = action({
     ctx,
     { teamId, key },
   ): Promise<{ ok: boolean; error?: string }> => {
-    const { email } = await requireAdminAction(ctx);
+    const { email } = await requireAuthAction(ctx);
     // Verify the caller is a team admin (action context can't reach
     // ctx.db; round-trip through a query that does).
     await ctx.runQuery(internal.granolaDb.ensureTeamAdmin, { teamId });
@@ -182,7 +182,7 @@ export const saveApiKey = action({
 export const clearApiKey = action({
   args: { teamId: v.id("teams") },
   handler: async (ctx, { teamId }): Promise<{ ok: true }> => {
-    const { email } = await requireAdminAction(ctx);
+    const { email } = await requireAuthAction(ctx);
     await ctx.runQuery(internal.granolaDb.ensureTeamAdmin, { teamId });
     await ctx.runMutation(internal.granolaDb.clearApiKey, {
       teamId,

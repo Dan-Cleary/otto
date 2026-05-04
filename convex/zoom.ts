@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { action, internalAction } from "./_generated/server";
 import { internal } from "./_generated/api";
-import { requireAdminAction } from "./auth";
+import { requireAuthAction } from "./auth";
 
 // Zoom Server-to-Server OAuth integration. Customer drops three
 // credentials (Account ID, Client ID, Client Secret) once; Otto
@@ -165,7 +165,7 @@ export const saveCreds = action({
     ctx,
     args,
   ): Promise<{ ok: boolean; error?: string }> => {
-    const { email } = await requireAdminAction(ctx);
+    const { email } = await requireAuthAction(ctx);
     await ctx.runQuery(internal.zoomDb.ensureTeamAdmin, {
       teamId: args.teamId,
     });
@@ -230,7 +230,7 @@ export const getOAuthConnectUrl = action({
     ctx,
     { teamId, returnTo },
   ): Promise<{ url: string } | { error: string }> => {
-    await requireAdminAction(ctx);
+    await requireAuthAction(ctx);
     await ctx.runQuery(internal.zoomDb.ensureTeamAdmin, { teamId });
 
     const clientId = process.env.ZOOM_OAUTH_CLIENT_ID;
@@ -328,7 +328,7 @@ export const completeOAuthInternal = internalAction({
 export const clearCreds = action({
   args: { teamId: v.id("teams") },
   handler: async (ctx, { teamId }): Promise<{ ok: true }> => {
-    const { email } = await requireAdminAction(ctx);
+    const { email } = await requireAuthAction(ctx);
     await ctx.runQuery(internal.zoomDb.ensureTeamAdmin, { teamId });
     await ctx.runMutation(internal.zoomDb.remove, { teamId, actor: email });
     return { ok: true };
