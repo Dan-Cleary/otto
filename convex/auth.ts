@@ -78,10 +78,6 @@ export async function requireAuthAction(ctx: ActionCtx): Promise<{
   return ctx.runQuery(internal.authDb.currentUser, {});
 }
 
-// Backwards-compat alias. New call sites should use requireAuthAction
-// + an explicit ensureTeamAdmin runQuery.
-export const requireAdminAction = requireAuthAction;
-
 // Mutation-context: ensure the user has at least one team. If not,
 // bootstrap a personal team (or claim the legacy data set if they're
 // the very first user in the deployment) and return the team id.
@@ -142,12 +138,11 @@ export async function ensureTeamForUser(
   return teamId;
 }
 
-// Cheap probe: does any team-scoped table contain a row that pre-dates
-// the multi-tenant refactor (i.e. has no teamId)? We sample up to 50
-// rows per table because Convex doesn't guarantee ordering — just
-// looking at .first() can miss a legacy row sitting behind a
-// post-refactor row.
-const ORPHAN_PROBE_LIMIT = 50;
+// Deterministic existence check: does any team-scoped table contain a
+// row that pre-dates the multi-tenant refactor (i.e. has no teamId)?
+// Each table has a `by_team` index where teamId can be undefined for
+// legacy rows; we query that index for the empty-key case and take the
+// first row, so we get a definitive yes/no per table without scanning.
 async function hasOrphanRows(ctx: MutationCtx): Promise<boolean> {
   for (const tableName of [
     "projects",
@@ -158,13 +153,10 @@ async function hasOrphanRows(ctx: MutationCtx): Promise<boolean> {
     "auditLog",
     "settings",
   ] as const) {
-    const sample = await ctx.db.query(tableName).take(ORPHAN_PROBE_LIMIT);
-    if (
-      sample.some(
-        (r) =>
-          (r as any).teamId === undefined || (r as any).teamId === null,
-      )
-    ) {
+    const orphan = await (ctx.db.query(tableName) as any)
+      .withIndex("by_team", (q: any) => q.eq("teamId", undefined))
+      .first();
+    if (orphan) {
       return true;
     }
   }

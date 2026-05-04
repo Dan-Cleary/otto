@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { action, internalAction } from "./_generated/server";
 import { internal } from "./_generated/api";
-import { requireAdminAction } from "./auth";
+import { requireAuthAction } from "./auth";
 
 // Zoom Server-to-Server OAuth integration. Customer drops three
 // credentials (Account ID, Client ID, Client Secret) once; Otto
@@ -107,8 +107,9 @@ export const pollNewRecordings = internalAction({
 
       for (const m of meetings) {
         const startMs = Date.parse(m.start_time ?? "");
-        if (Number.isFinite(startMs) && startMs <= since) continue;
-        if (Number.isFinite(startMs) && startMs > maxStart) maxStart = startMs;
+        if (!Number.isFinite(startMs)) continue;
+        if (startMs <= since) continue;
+        if (startMs > maxStart) maxStart = startMs;
 
         const transcriptFile = (m.recording_files ?? []).find(
           (f: any) => f.file_type === "TRANSCRIPT",
@@ -165,7 +166,7 @@ export const saveCreds = action({
     ctx,
     args,
   ): Promise<{ ok: boolean; error?: string }> => {
-    const { email } = await requireAdminAction(ctx);
+    const { email } = await requireAuthAction(ctx);
     await ctx.runQuery(internal.zoomDb.ensureTeamAdmin, {
       teamId: args.teamId,
     });
@@ -218,19 +219,13 @@ export const saveCreds = action({
 // and set ZOOM_OAUTH_CLIENT_ID + ZOOM_OAUTH_CLIENT_SECRET in convex
 // env. Customers themselves never see Zoom credentials.
 
-const OAUTH_SCOPES = [
-  "recording:read:admin",
-  "meeting:read:admin",
-  "user:read:admin",
-];
-
 export const getOAuthConnectUrl = action({
   args: { teamId: v.id("teams"), returnTo: v.optional(v.string()) },
   handler: async (
     ctx,
     { teamId, returnTo },
   ): Promise<{ url: string } | { error: string }> => {
-    await requireAdminAction(ctx);
+    await requireAuthAction(ctx);
     await ctx.runQuery(internal.zoomDb.ensureTeamAdmin, { teamId });
 
     const clientId = process.env.ZOOM_OAUTH_CLIENT_ID;
@@ -328,7 +323,7 @@ export const completeOAuthInternal = internalAction({
 export const clearCreds = action({
   args: { teamId: v.id("teams") },
   handler: async (ctx, { teamId }): Promise<{ ok: true }> => {
-    const { email } = await requireAdminAction(ctx);
+    const { email } = await requireAuthAction(ctx);
     await ctx.runQuery(internal.zoomDb.ensureTeamAdmin, { teamId });
     await ctx.runMutation(internal.zoomDb.remove, { teamId, actor: email });
     return { ok: true };
