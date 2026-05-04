@@ -19,9 +19,6 @@ const ZOOM_OAUTH_TOKEN = "https://zoom.us/oauth/token";
 const ZOOM_OAUTH_AUTHORIZE = "https://zoom.us/oauth/authorize";
 const ZOOM_API = "https://api.zoom.us/v2";
 
-// Backwards-compat alias for the S2S code paths below.
-const ZOOM_OAUTH = ZOOM_OAUTH_TOKEN;
-
 // Cron entry point — fan out to every team that has Zoom enabled.
 export const pollAll = internalAction({
   args: {},
@@ -109,7 +106,6 @@ export const pollNewRecordings = internalAction({
         const startMs = Date.parse(m.start_time ?? "");
         if (!Number.isFinite(startMs)) continue;
         if (startMs <= since) continue;
-        if (startMs > maxStart) maxStart = startMs;
 
         const transcriptFile = (m.recording_files ?? []).find(
           (f: any) => f.file_type === "TRANSCRIPT",
@@ -140,6 +136,7 @@ export const pollNewRecordings = internalAction({
             transcript: vttToText(transcript),
           },
         });
+        if (startMs > maxStart) maxStart = startMs;
         ingested++;
       }
     }
@@ -585,7 +582,7 @@ async function fetchToken(creds: {
   clientSecret: string;
 }): Promise<{ value: string; expiresAt: number } | { error: string }> {
   const url =
-    `${ZOOM_OAUTH}?grant_type=account_credentials&account_id=` +
+    `${ZOOM_OAUTH_TOKEN}?grant_type=account_credentials&account_id=` +
     encodeURIComponent(creds.accountId);
   const basic = btoa(`${creds.clientId}:${creds.clientSecret}`);
   let res: Response;
