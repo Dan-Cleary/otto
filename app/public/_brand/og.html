@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=VT323&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    /* Renders at exactly 1200x630 (OG image standard).
+       Visit /[brand]/og.html in the browser, screenshot it (window
+       sized to 1200x630), save as /og.png. */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 1200px; height: 630px; overflow: hidden; }
+    body {
+      background: #ece4d3;
+      background-image:
+        linear-gradient(rgba(28,26,22,0) 50%, rgba(28,26,22,0.025) 50%);
+      background-size: 100% 4px;
+      font-family: "JetBrains Mono", ui-monospace, monospace;
+      color: #1c1a16;
+      padding: 80px 96px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .top {
+      display: flex; align-items: center; gap: 28px;
+    }
+    .top img { image-rendering: pixelated; width: 96px; height: 96px; }
+    .wordmark {
+      font-family: "VT323", monospace;
+      font-size: 72px;
+      letter-spacing: 0.04em;
+      line-height: 1;
+    }
+    .version {
+      background: #1c1a16; color: #f6efde;
+      font-family: "VT323", monospace;
+      font-size: 28px;
+      padding: 2px 12px 0;
+      letter-spacing: 0.05em;
+    }
+    .pitch {
+      display: flex; align-items: flex-end; justify-content: space-between;
+      gap: 48px;
+    }
+    h1 {
+      font-family: "VT323", monospace;
+      font-size: 96px;
+      line-height: 0.95;
+      letter-spacing: 0.005em;
+    }
+    h1 em { font-style: italic; color: #a87528; }
+    .meta {
+      font-size: 16px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #6b6356;
+      text-align: right;
+      max-width: 320px;
+      line-height: 1.6;
+    }
+    .meta strong { color: #1c1a16; font-weight: 500; }
+  </style>
+</head>
+<body>
+  <div class="top">
+    <img src="/otto/sprites/otter-idle.svg" alt="otto" />
+    <span class="wordmark">otto</span>
+    <span class="version">v0.4</span>
+    <span class="meta" style="margin-left:auto; text-align:right;">
+      ottoagent.app
+    </span>
+  </div>
+
+  <div class="pitch">
+    <h1>otto joins your<br/>meetings.<br/><em>otto ships it.</em></h1>
+    <div class="meta">
+      <strong>your engineering agent.</strong>
+      <br/>
+      meeting ends,
+      draft pr lands minutes later.
+      never auto-merges.
+    </div>
+  </div>
+</body>
+</html>

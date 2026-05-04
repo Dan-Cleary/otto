@@ -1,0 +1,206 @@
+<!--
+  Tiny static layout used to wrap legal markdown into legible HTML.
+  Build script `scripts/render-legal.mjs` reads each .md in
+  app/public/legal/, renders to HTML using this template, and writes
+  matching .html files. The .md files stay too — convenient for
+  copy-paste edits.
+-->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy policy · otto</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=VT323&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    :root {
+      --bg:        #ece4d3;
+      --panel:     #e2d8c2;
+      --cream:     #f6efde;
+      --amber:     #c89045;
+      --amber-dim: #a87528;
+      --hair:      #b8ad94;
+      --ink:       #1c1a16;
+      --pencil:    #6b6356;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "JetBrains Mono", ui-monospace, monospace;
+      font-size: 14px;
+      line-height: 1.65;
+      padding: 32px 16px 96px;
+    }
+    .frame {
+      max-width: 760px;
+      margin: 0 auto;
+      background: var(--cream);
+      border: 1px solid var(--hair);
+      padding: 48px 56px;
+    }
+    nav.top {
+      max-width: 760px;
+      margin: 0 auto 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 4px;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--pencil);
+    }
+    nav.top a { color: var(--pencil); text-decoration: none; }
+    nav.top a:hover { color: var(--ink); }
+    nav.top img { width: 24px; height: 24px; image-rendering: pixelated; }
+    nav.top .right { margin-left: auto; display: flex; gap: 18px; }
+    h1 {
+      font-family: "VT323", monospace;
+      font-size: 56px;
+      line-height: 1;
+      margin: 0 0 24px;
+      color: var(--ink);
+    }
+    h2 {
+      font-family: "VT323", monospace;
+      font-size: 28px;
+      margin: 32px 0 12px;
+      line-height: 1.1;
+    }
+    h3 {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--pencil);
+      margin: 22px 0 8px;
+    }
+    p { margin: 0 0 12px; }
+    ul, ol { margin: 0 0 14px; padding-left: 24px; }
+    li { margin: 4px 0; }
+    a {
+      color: var(--amber-dim);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+    a:hover { color: var(--ink); }
+    code {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 12.5px;
+      background: var(--bg);
+      padding: 1px 6px;
+      border: 1px solid var(--hair);
+    }
+    strong { font-weight: 600; }
+    hr { border: 0; border-top: 1px dashed var(--hair); margin: 32px 0; }
+    @media (max-width: 600px) {
+      .frame { padding: 28px 22px; }
+      h1 { font-size: 40px; }
+      h2 { font-size: 22px; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="top">
+    <a href="/"><img src="/favicon.svg" alt="otto" /></a>
+    <span>otto · legal</span>
+    <span class="right">
+      <a href="/legal/privacy">privacy</a>
+      <a href="/legal/terms">terms</a>
+      <a href="/.well-known/security.txt">security</a>
+    </span>
+  </nav>
+  <main class="frame">
+<h1>Privacy policy</h1>
+<p>Last updated: May 3, 2026.</p>
+<p>This policy describes what data Otto collects, how we use it, and the rights you have over your data.</p>
+<h2>Owner and data controller</h2>
+<p>Tethered Software Inc.</p>
+<p>305 Chapel Hill Road, Atlantic Highlands, NJ 07716, United States</p>
+<p>Owner contact email: <a href="mailto:dan@prompthub.us">dan@prompthub.us</a> Product support: <a href="mailto:support@ottoagent.app">support@ottoagent.app</a></p>
+<h2>What Otto does</h2>
+<p>Otto is an agent that turns meeting notes, transcripts, and dashboard feedback into draft pull requests. Two data flows are relevant for privacy:</p>
+<ol>
+  <li><strong>Source content your team gives Otto.</strong> Granola meeting notes, Zoom recording transcripts, and feedback your end users submit through the embedded widget. Otto reads this content, extracts code-shaped action items, and uses them to draft PRs.</li>
+  <li><strong>Account and admin data.</strong> When you sign in to ottoagent.app to manage Otto, we store the minimum data needed to identify you, scope you to your team, and run your integrations.</li>
+</ol>
+<h2>Source content Otto stores</h2>
+<h3>Meeting transcripts and notes (Granola, Zoom)</h3>
+<p>When you connect Granola or Zoom, Otto pulls finished meeting notes / cloud-recording transcripts on a recurring schedule. We store:</p>
+<ul>
+  <li>The transcript text</li>
+  <li>Meeting title, host, start time, duration</li>
+  <li>The platform&#39;s identifier for the meeting (so we don&#39;t double-ingest)</li>
+  <li>The action items Otto extracts from the transcript</li>
+</ul>
+<p>We do not capture audio or video. We do not join meetings or attend in real time.</p>
+<h3>Widget feedback (browser script tag)</h3>
+<p>When the Otto widget is embedded on one of your team&#39;s pages and a user submits feedback, we store:</p>
+<ul>
+  <li>The page URL the feedback came from</li>
+  <li>The text the user typed</li>
+  <li>The last 20 console errors observed by the page</li>
+  <li>Browser viewport size and user agent string</li>
+  <li>Submission timestamp</li>
+</ul>
+<h3>Routing memory</h3>
+<p>When a teammate corrects Otto&#39;s repo routing in the Slack review queue, we store the corrected description and the embedding we computed for it, so Otto can route similar requests to the correct repo in the future.</p>
+<h3>Retention</h3>
+<p>Source content is retained for the duration specified by your plan: 90 days on Free, 1 year on Solo, 5 years on Pro. After retention expires, source content is removed from application-controlled storage on a daily sweep. Account deletion removes all associated source content from application-controlled storage within 24 hours.</p>
+<p>Encrypted backups and infrastructure logs (held by our hosting provider) may retain copies for up to 30 days after deletion before they cycle out of backup retention. We never read these backups except to restore the service after an incident.</p>
+<h2>Account and admin data</h2>
+<p>When you sign in to ottoagent.app, we store:</p>
+<ul>
+  <li>The email and password hash of the account (handled by Convex Auth)</li>
+  <li>Your team membership(s) and role</li>
+  <li>Per-team integration credentials (Granola API keys, Zoom OAuth tokens, Slack tokens, widget shared secrets)</li>
+  <li>Per-team settings (confidence threshold, project URL patterns)</li>
+  <li>Audit log of admin actions (who connected an integration, who approved an item, etc.)</li>
+  <li>Session cookies for your Otto login</li>
+</ul>
+<p>We never receive payment card numbers; billing is handled by Stripe.</p>
+<h2>What we don&#39;t do</h2>
+<ul>
+  <li>We do not auto-merge any pull request Otto drafts. Every output is a draft for human review.</li>
+  <li>We do not feed your transcripts or feedback into model training.</li>
+  <li>We do not sell or rent any of the data described above.</li>
+  <li>We do not call the Granola, Zoom, or Slack APIs beyond what you have authorized.</li>
+  <li>End-user IP addresses from widget submissions are not stored in application-controlled storage; they may briefly appear in our hosting provider&#39;s request logs and are cycled out per that provider&#39;s standard log retention.</li>
+</ul>
+<h2>Sub-processors</h2>
+<ul>
+  <li><strong>Convex.</strong> Backend hosting (database, functions, file storage, auth). Governed by <a href="https://www.convex.dev/legal/privacy">Convex&#39;s privacy policy</a>.</li>
+  <li><strong>OpenAI.</strong> Used to extract action items from feedback / transcripts and to embed text for routing. Governed by <a href="https://openai.com/policies/privacy-policy/">OpenAI&#39;s privacy policy</a>. Otto sends only the relevant feedback text + (where applicable) transcript excerpts. Data handling follows OpenAI&#39;s API data usage policy: API content is not used to train OpenAI&#39;s models, and is retained per OpenAI&#39;s standard API retention period.</li>
+  <li><strong>Cursor.</strong> Used to draft pull requests via Cursor cloud agents. Governed by <a href="https://cursor.com/privacy">Cursor&#39;s privacy policy</a>.</li>
+  <li><strong>Granola.</strong> Used (only if you connect it) to pull meeting notes you have already created. Governed by <a href="https://granola.ai/privacy">Granola&#39;s privacy policy</a>.</li>
+  <li><strong>Zoom.</strong> Used (only if you connect it) to pull cloud-recording transcripts. Governed by <a href="https://zoom.us/privacy">Zoom&#39;s privacy policy</a>.</li>
+  <li><strong>Slack.</strong> Used (only if you connect it) to deliver review-queue messages and accept approvals. Governed by <a href="https://slack.com/trust/privacy">Slack&#39;s privacy policy</a>.</li>
+  <li><strong>GitHub.</strong> Used to open draft pull requests on the repos you register. Governed by <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement">GitHub&#39;s privacy statement</a>.</li>
+  <li><strong>Stripe.</strong> Payment processing for paid plans. Governed by <a href="https://stripe.com/privacy">Stripe&#39;s privacy policy</a>.</li>
+  <li><strong>Resend.</strong> Transactional email (invites, notifications). Governed by <a href="https://resend.com/legal/privacy-policy">Resend&#39;s privacy policy</a>.</li>
+  <li><strong>Vercel.</strong> Hosting for the marketing site and admin app. Governed by <a href="https://vercel.com/legal/privacy-policy">Vercel&#39;s privacy policy</a>.</li>
+</ul>
+<h2>Your rights</h2>
+<ul>
+  <li><strong>Access and export.</strong> Export your team&#39;s data as JSON from the admin app at any time.</li>
+  <li><strong>Delete.</strong> Delete your team at any time, which removes all associated source content, integrations, and audit logs.</li>
+  <li><strong>Account deletion.</strong> Request deletion of your account and all associated data by emailing <a href="mailto:support@ottoagent.app">support@ottoagent.app</a>.</li>
+</ul>
+<p>For GDPR, CCPA, or other statutory data rights, email us and we will honor requests within the statutory window.</p>
+<h2>Cookies on ottoagent.app</h2>
+<p>The marketing pages and admin app set only the cookies required for authentication session management. We do not run third-party analytics on the public pages of this site.</p>
+<h2>Changes</h2>
+<p>If we update this policy, we will update the &quot;Last updated&quot; date at the top. For material changes, we will notify active account holders by email.</p>
+<h2>Contact</h2>
+<p>Privacy and data-controller questions: <a href="mailto:dan@prompthub.us">dan@prompthub.us</a>. General product support: <a href="mailto:support@ottoagent.app">support@ottoagent.app</a>.</p>
+  </main>
+</body>
+</html>

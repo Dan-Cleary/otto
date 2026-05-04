@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>acme · orders dashboard (otto widget demo)</title>
+  <style>
+    /* A deliberately bland "internal tool" surface so the otto widget
+       reads as a guest. Linear/Vercel-ish neutral palette. */
+    :root {
+      --bg:     #fafafa;
+      --panel:  #ffffff;
+      --border: #e5e5e5;
+      --ink:    #111;
+      --muted:  #6b7280;
+      --accent: #2563eb;
+      --green:  #15803d;
+      --amber:  #b45309;
+      --red:    #b91c1c;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body {
+      font: 14px -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+      min-height: 100vh;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 24px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+    }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 600; }
+    .brand-logo {
+      width: 24px; height: 24px;
+      background: var(--accent);
+      border-radius: 6px;
+      display: inline-block;
+    }
+    .nav { display: flex; gap: 18px; font-size: 13px; color: var(--muted); }
+    .nav a { color: var(--muted); text-decoration: none; padding: 4px 0; }
+    .nav a.active { color: var(--ink); border-bottom: 2px solid var(--ink); }
+    .me { font-size: 12px; color: var(--muted); }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    aside {
+      padding: 20px 16px;
+      border-right: 1px solid var(--border);
+      min-height: calc(100vh - 56px);
+    }
+    aside .group { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin: 18px 8px 8px; }
+    aside a {
+      display: block;
+      padding: 6px 8px;
+      border-radius: 6px;
+      color: var(--ink);
+      text-decoration: none;
+      font-size: 13px;
+    }
+    aside a:hover { background: #f1f1f1; }
+    aside a.active { background: #eef2ff; color: var(--accent); }
+
+    main { padding: 24px 32px 96px; }
+    h1 { font-size: 22px; margin: 0 0 4px; }
+    .crumbs { font-size: 12px; color: var(--muted); margin-bottom: 20px; }
+
+    .stat-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .stat {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+    }
+    .stat .l { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .stat .v { font-size: 24px; font-weight: 600; margin-top: 4px; }
+    .stat .d { font-size: 12px; color: var(--muted); margin-top: 4px; }
+    .stat .d.up { color: var(--green); }
+    .stat .d.down { color: var(--red); }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .panel-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .panel-head h2 { font-size: 14px; margin: 0; }
+    .panel-head .actions { display: flex; gap: 8px; }
+    .btn {
+      font: inherit; font-size: 12px;
+      padding: 5px 10px;
+      border: 1px solid var(--border);
+      background: var(--panel);
+      border-radius: 6px;
+      color: var(--ink);
+      cursor: pointer;
+    }
+    .btn:hover { border-color: #d4d4d4; background: #f7f7f7; }
+    .btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
+    .btn.primary[disabled] { opacity: 0.6; cursor: not-allowed; }
+    .btn.primary:not([disabled]):hover { background: #1d4fd1; border-color: #1d4fd1; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { text-align: left; padding: 10px 16px; border-bottom: 1px solid var(--border); }
+    th { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 500; }
+    tr:last-child td { border-bottom: 0; }
+    .pill {
+      display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 999px;
+      background: #f4f4f5; color: var(--muted);
+    }
+    .pill.paid { background: #ecfdf5; color: var(--green); }
+    .pill.pend { background: #fffbeb; color: var(--amber); }
+    .pill.fail { background: #fef2f2; color: var(--red); }
+
+    .callout {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 13px;
+      color: #713f12;
+      margin-bottom: 24px;
+      display: flex; align-items: flex-start; gap: 10px;
+    }
+    .callout strong { color: #92400e; }
+    .callout .dot { width: 8px; height: 8px; background: var(--amber); border-radius: 999px; margin-top: 6px; flex-shrink: 0; }
+
+    /* Banner explaining what this page is for */
+    .demo-banner {
+      background: #1c1a16;
+      color: #f6efde;
+      font: 12px "JetBrains Mono", ui-monospace, monospace;
+      padding: 8px 16px;
+      letter-spacing: 0.04em;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 16px;
+    }
+    .demo-banner a { color: #c89045; text-decoration: underline; text-underline-offset: 2px; }
+  </style>
+</head>
+<body>
+
+  <div class="demo-banner">
+    <span>↳ otto widget demo · this is a fake internal dashboard. look bottom-right for the otto button.</span>
+    <span><a href="/">view landing</a> · <a href="/login">open dashboard</a></span>
+  </div>
+
+  <header class="topbar">
+    <div class="brand"><span class="brand-logo"></span> acme orders</div>
+    <nav class="nav">
+      <a href="#" class="active">overview</a>
+      <a href="#">orders</a>
+      <a href="#">customers</a>
+      <a href="#">refunds</a>
+    </nav>
+    <span class="me">dan@acme.test</span>
+  </header>
+
+  <div class="layout">
+    <aside>
+      <div class="group">workspace</div>
+      <a href="#">today</a>
+      <a href="#" class="active">orders</a>
+      <a href="#">payouts</a>
+      <a href="#">disputes</a>
+      <div class="group">tools</div>
+      <a href="#">exports</a>
+      <a href="#">api keys</a>
+      <a href="#">settings</a>
+    </aside>
+
+    <main>
+      <h1>orders</h1>
+      <div class="crumbs">workspace / orders</div>
+
+      <div class="callout">
+        <span class="dot"></span>
+        <span>
+          something off about this page? click the otto button in the bottom-right
+          to file feedback. otto reads it, drafts a pr, and posts it to the team.
+          <strong>no auto-merge.</strong>
+        </span>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat"><div class="l">orders today</div><div class="v">142</div><div class="d up">+8% wow</div></div>
+        <div class="stat"><div class="l">gmv today</div><div class="v">$24,318</div><div class="d up">+12% wow</div></div>
+        <div class="stat"><div class="l">avg order</div><div class="v">$171.25</div><div class="d down">-2% wow</div></div>
+        <div class="stat"><div class="l">refund rate</div><div class="v">1.4%</div><div class="d">flat</div></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h2>recent orders</h2>
+          <div class="actions">
+            <button class="btn">filter</button>
+            <!-- This is the (broken-feeling) button you'd file feedback about -->
+            <button class="btn primary" onclick="alert('exporting 0 selected rows… 😬')">export selected</button>
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th style="width:32px"><input type="checkbox" /></th>
+              <th>order</th>
+              <th>customer</th>
+              <th>total</th>
+              <th>status</th>
+              <th>placed</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><input type="checkbox" /></td><td>#A-2841</td><td>jane patel</td><td>$248.00</td><td><span class="pill paid">paid</span></td><td>2m ago</td></tr>
+            <tr><td><input type="checkbox" /></td><td>#A-2840</td><td>sam ford</td><td>$112.50</td><td><span class="pill paid">paid</span></td><td>14m ago</td></tr>
+            <tr><td><input type="checkbox" /></td><td>#A-2839</td><td>rae kim</td><td>$48.00</td><td><span class="pill pend">pending</span></td><td>22m ago</td></tr>
+            <tr><td><input type="checkbox" /></td><td>#A-2838</td><td>mira soto</td><td>$1,420.00</td><td><span class="pill paid">paid</span></td><td>40m ago</td></tr>
+            <tr><td><input type="checkbox" /></td><td>#A-2837</td><td>otis chen</td><td>$92.10</td><td><span class="pill fail">failed</span></td><td>1h ago</td></tr>
+            <tr><td><input type="checkbox" /></td><td>#A-2836</td><td>anya volkov</td><td>$315.75</td><td><span class="pill paid">paid</span></td><td>1h ago</td></tr>
+            <tr><td><input type="checkbox" /></td><td>#A-2835</td><td>leo wang</td><td>$74.00</td><td><span class="pill paid">paid</span></td><td>2h ago</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <!--
+    The otto widget. The endpoint points at this Convex deployment's
+    HTTP site URL. data-secret comes from ?secret=… on the URL so we
+    don't have to bake it into the page.
+  -->
+  <script
+    src="/otto.js"
+    data-endpoint="YOUR_CONVEX_SITE_URL/ingest/widget"
+    data-secret="WIDGET_SHARED_SECRET_GOES_HERE"
+    defer
+  ></script>
+  <script>
+    // Same trick as widget-test.html: read ?secret= from URL.
+    const params = new URLSearchParams(location.search);
+    const secret = params.get("secret");
+    if (secret) {
+      const tag = document.querySelector("script[src='/otto.js']");
+      if (tag) tag.dataset.secret = secret;
+    }
+  </script>
+</body>
+</html>

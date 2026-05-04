@@ -1,0 +1,156 @@
+/* Otto design tokens — Daemon direction (paper + amber).
+ *
+ * Source of truth: design_handoff_otto_identity/spec/tokens.css.
+ * Otto's native surfaces use paper + ink + amber. Status uses oxide green
+ * and rust red. Third-party hosts (GitHub, chat, IDE) keep their own
+ * visual language; only the small otter avatar carries Otto's brand there.
+ */
+
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=VT323&display=swap");
+
+:root {
+  /* Surface */
+  --otto-bg:        #ece4d3;   /* paper — primary background */
+  --otto-panel:     #e2d8c2;   /* paper deep — sidebars, secondary panels */
+  --otto-cream:     #f6efde;   /* bone — card surfaces */
+
+  /* Sprite / accent */
+  --otto-amber:     #c89045;
+  --otto-amber-dim: #a87528;
+  --otto-amber-deep:#b8ad94;   /* hairline border */
+
+  /* Type */
+  --otto-ink:       #1c1a16;
+  --otto-pencil:    #6b6356;
+
+  /* Status */
+  --otto-green:     #3d5440;
+  --otto-red:       #a04a2c;
+
+  /* Type families */
+  --otto-font-display: "VT323", monospace;
+  --otto-font-mono:    "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --otto-font-sans:    "Inter", system-ui, sans-serif;
+
+  /* Type scale */
+  --otto-text-hero:    88px;
+  --otto-text-h1:      64px;
+  --otto-text-h2:      32px;
+  --otto-text-h3:      24px;
+  --otto-text-h4:      18px;
+  --otto-text-body:    13px;
+  --otto-text-small:   12px;
+  --otto-text-xs:      11px;
+  --otto-text-2xs:     10px;
+  --otto-text-3xs:      9px;
+
+  /* Spacing (4-base) */
+  --otto-space-1:   4px;
+  --otto-space-2:   8px;
+  --otto-space-3:   12px;
+  --otto-space-4:   16px;
+  --otto-space-5:   20px;
+  --otto-space-6:   24px;
+  --otto-space-8:   32px;
+  --otto-space-10:  40px;
+  --otto-space-12:  48px;
+  --otto-space-14:  56px;
+
+  /* Borders */
+  --otto-border-hair:   1px solid var(--otto-amber-deep);
+  --otto-border-strong: 2px solid var(--otto-ink);
+  --otto-border-dashed: 1px dashed var(--otto-amber-deep);
+  --otto-radius:        0px;
+  --otto-radius-sm:     4px;
+
+  /* Letter spacing */
+  --otto-tracking-eyebrow: 0.18em;
+  --otto-tracking-tight:   0.02em;
+  --otto-tracking-state:   0.1em;
+
+  /* Effects */
+  --otto-shadow-card: 6px 6px 0 var(--otto-amber-deep);
+  --otto-scanlines:   linear-gradient(
+                        rgba(28,26,22,0) 50%,
+                        rgba(28,26,22,0.025) 50%
+                      );
+
+  /* Motion */
+  --otto-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --otto-dur-fast: 120ms;
+  --otto-dur-med:  240ms;
+
+  /* ── Backwards-compatible aliases (keep existing tabs working) ──────
+   * The codebase references --o-* tokens in many places; map them onto
+   * the canonical Otto Daemon palette so the whole app re-skins at once.
+   */
+  --o-bg:                var(--otto-bg);
+  --o-surface:           var(--otto-cream);
+  --o-border:            var(--otto-amber-deep);
+  --o-border-strong:     var(--otto-ink);
+  --o-text:              var(--otto-ink);
+  --o-text-muted:        var(--otto-pencil);
+  --o-text-subtle:       #8a8270;
+
+  --o-accent:            var(--otto-amber-dim);
+  --o-accent-hover:      var(--otto-ink);
+  --o-accent-fg:         var(--otto-cream);
+  --o-accent-soft:       #f1e4c8;
+  --o-accent-soft-border: var(--otto-amber-deep);
+
+  --o-status-idle:       var(--otto-pencil);
+  --o-status-progress:   var(--otto-amber);
+  --o-status-warn:       var(--otto-amber-dim);
+  --o-status-success:    var(--otto-green);
+  --o-status-error:      var(--otto-red);
+  --o-status-neutral:    #8a8270;
+
+  --o-font-display:      var(--otto-font-display);
+  --o-font-ui:           var(--otto-font-mono);
+  --o-font-mono:         var(--otto-font-mono);
+  --o-font-script:       var(--otto-font-display);
+
+  --o-space-1: var(--otto-space-1);
+  --o-space-2: var(--otto-space-2);
+  --o-space-3: var(--otto-space-3);
+  --o-space-4: var(--otto-space-4);
+  --o-space-5: var(--otto-space-6);
+  --o-space-6: var(--otto-space-8);
+  --o-space-8: var(--otto-space-12);
+
+  --o-r-sm:    var(--otto-radius-sm);
+  --o-r-md:    var(--otto-radius-sm);
+  --o-r-lg:    var(--otto-radius-sm);
+  --o-r-pill:  999px;
+
+  --o-shadow-sm: none;
+  --o-shadow-md: var(--otto-shadow-card);
+  --o-shadow-lg: var(--otto-shadow-card);
+
+  --o-ease:      var(--otto-ease);
+  --o-dur-fast:  var(--otto-dur-fast);
+  --o-dur-med:   var(--otto-dur-med);
+}
+
+/* Otter sprite renders as a pixelated <img>. Integer scales only. */
+.otto-sprite {
+  display: inline-block;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  vertical-align: middle;
+}
+
+@keyframes otto-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-1px); }
+}
+@keyframes otto-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.78; }
+}
+.otto-sprite-thinking { animation: otto-pulse 1.4s var(--otto-ease) infinite; }
+.otto-sprite-idle     { animation: otto-float 4.2s var(--otto-ease) infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .otto-sprite { animation: none !important; }
+}

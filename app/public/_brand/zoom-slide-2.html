@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=VT323&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 1200px; height: 780px; overflow: hidden; }
+    body {
+      background: #ece4d3;
+      background-image: linear-gradient(rgba(28,26,22,0) 50%, rgba(28,26,22,0.025) 50%);
+      background-size: 100% 4px;
+      font-family: "JetBrains Mono", ui-monospace, monospace;
+      color: #1c1a16;
+      padding: 72px 80px;
+    }
+    h2 { font-family: "VT323", monospace; font-size: 64px; line-height: 1; margin-bottom: 56px; }
+    h2 em { color: #a87528; font-style: italic; }
+    .flow { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr; gap: 12px; align-items: center; }
+    .step { background: #f6efde; border: 2px solid #1c1a16; box-shadow: 6px 6px 0 #b8ad94; padding: 24px 20px; min-height: 280px; display: flex; flex-direction: column; gap: 12px; }
+    .step .num { font-family: "VT323", monospace; font-size: 24px; color: #a87528; letter-spacing: 0.1em; }
+    .step h3 { font-family: "VT323", monospace; font-size: 30px; line-height: 1.05; }
+    .step p { font-size: 13px; line-height: 1.55; color: #4a443a; }
+    .arrow { font-family: "VT323", monospace; font-size: 56px; color: #a87528; text-align: center; }
+    .footer { margin-top: 72px; display: flex; justify-content: space-between; font-size: 14px; letter-spacing: 0.18em; text-transform: uppercase; color: #6b6356; }
+  </style>
+</head>
+<body>
+  <h2>how it works <em>standup → pr</em></h2>
+  <div class="flow">
+    <div class="step">
+      <div class="num">01</div>
+      <h3>otto listens</h3>
+      <p>connect zoom once. otto pulls every new cloud-recording transcript on its own. never joins the call.</p>
+    </div>
+    <div class="arrow">›</div>
+    <div class="step">
+      <div class="num">02</div>
+      <h3>extracts asks</h3>
+      <p>scans for code-shaped action items. routes each one to the right repo by your project rules.</p>
+    </div>
+    <div class="arrow">›</div>
+    <div class="step">
+      <div class="num">03</div>
+      <h3>opens a draft pr</h3>
+      <p>a small reviewable diff with the original transcript attached. you review, you merge.</p>
+    </div>
+  </div>
+  <div class="footer">
+    <span>read-only on zoom · never auto-merges · never stores audio or video</span>
+    <span style="color: #a87528">ottoagent.app</span>
+  </div>
+</body>
+</html>

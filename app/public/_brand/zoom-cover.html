@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=VT323&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    /* Renders at exactly 1824x176 (Zoom Marketplace cover).
+       Left ~280px gets covered by app logo, so keep critical
+       content on the right two-thirds. */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 1824px; height: 176px; overflow: hidden; }
+    body {
+      background: #ece4d3;
+      background-image: linear-gradient(rgba(28,26,22,0) 50%, rgba(28,26,22,0.03) 50%);
+      background-size: 100% 4px;
+      font-family: "JetBrains Mono", ui-monospace, monospace;
+      color: #1c1a16;
+      display: flex;
+      align-items: center;
+      padding: 0 64px 0 320px;
+      gap: 48px;
+    }
+    .pitch {
+      font-family: "VT323", monospace;
+      font-size: 56px;
+      line-height: 1;
+      letter-spacing: 0.005em;
+      flex: 1;
+    }
+    .pitch em { font-style: italic; color: #a87528; }
+    .meta {
+      font-size: 13px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #6b6356;
+      text-align: right;
+      line-height: 1.6;
+    }
+    .meta strong { color: #1c1a16; font-weight: 500; }
+  </style>
+</head>
+<body>
+  <div class="pitch">otto joins your meetings. <em>otto ships the changes.</em></div>
+  <div class="meta">
+    <strong>your engineering agent.</strong><br/>
+    meeting ends, draft pr lands minutes later.<br/>
+    ottoagent.app
+  </div>
+</body>
+</html>

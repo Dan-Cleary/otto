@@ -1,0 +1,14 @@
+node_modules
+.git
+**/node_modules
+app/dist
+app/tsconfig.tsbuildinfo
+.claude
+.cursor
+*.log
+.DS_Store
+**/.env.local
+**/.env.*.local
+**/.env
+**/.env.*
+!**/.env.example

@@ -1,0 +1,125 @@
+<!--
+  Tiny static layout used to wrap legal markdown into legible HTML.
+  Build script `scripts/render-legal.mjs` reads each .md in
+  app/public/legal/, renders to HTML using this template, and writes
+  matching .html files. The .md files stay too — convenient for
+  copy-paste edits.
+-->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{TITLE}} · otto</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=VT323&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    :root {
+      --bg:        #ece4d3;
+      --panel:     #e2d8c2;
+      --cream:     #f6efde;
+      --amber:     #c89045;
+      --amber-dim: #a87528;
+      --hair:      #b8ad94;
+      --ink:       #1c1a16;
+      --pencil:    #6b6356;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "JetBrains Mono", ui-monospace, monospace;
+      font-size: 14px;
+      line-height: 1.65;
+      padding: 32px 16px 96px;
+    }
+    .frame {
+      max-width: 760px;
+      margin: 0 auto;
+      background: var(--cream);
+      border: 1px solid var(--hair);
+      padding: 48px 56px;
+    }
+    nav.top {
+      max-width: 760px;
+      margin: 0 auto 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 4px;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--pencil);
+    }
+    nav.top a { color: var(--pencil); text-decoration: none; }
+    nav.top a:hover { color: var(--ink); }
+    nav.top img { width: 24px; height: 24px; image-rendering: pixelated; }
+    nav.top .right { margin-left: auto; display: flex; gap: 18px; }
+    h1 {
+      font-family: "VT323", monospace;
+      font-size: 56px;
+      line-height: 1;
+      margin: 0 0 24px;
+      color: var(--ink);
+    }
+    h2 {
+      font-family: "VT323", monospace;
+      font-size: 28px;
+      margin: 32px 0 12px;
+      line-height: 1.1;
+    }
+    h3 {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--pencil);
+      margin: 22px 0 8px;
+    }
+    p { margin: 0 0 12px; }
+    ul, ol { margin: 0 0 14px; padding-left: 24px; }
+    li { margin: 4px 0; }
+    a {
+      color: var(--amber-dim);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+    a:hover { color: var(--ink); }
+    code {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 12.5px;
+      background: var(--bg);
+      padding: 1px 6px;
+      border: 1px solid var(--hair);
+    }
+    strong { font-weight: 600; }
+    hr { border: 0; border-top: 1px dashed var(--hair); margin: 32px 0; }
+    @media (max-width: 600px) {
+      .frame { padding: 28px 22px; }
+      h1 { font-size: 40px; }
+      h2 { font-size: 22px; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="top">
+    <a href="/"><img src="/favicon.svg" alt="otto" /></a>
+    <span>otto · legal</span>
+    <span class="right">
+      <a href="/legal/privacy">privacy</a>
+      <a href="/legal/terms">terms</a>
+      <a href="/.well-known/security.txt">security</a>
+    </span>
+  </nav>
+  <main class="frame">
+{{BODY}}
+  </main>
+</body>
+</html>

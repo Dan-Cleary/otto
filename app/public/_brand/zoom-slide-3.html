@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=VT323&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 1200px; height: 780px; overflow: hidden; }
+    body {
+      background: #ece4d3;
+      background-image: linear-gradient(rgba(28,26,22,0) 50%, rgba(28,26,22,0.025) 50%);
+      background-size: 100% 4px;
+      font-family: "JetBrains Mono", ui-monospace, monospace;
+      color: #1c1a16;
+      padding: 72px 80px;
+    }
+    h2 { font-family: "VT323", monospace; font-size: 64px; line-height: 1; margin-bottom: 48px; }
+    h2 em { color: #a87528; font-style: italic; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+    .card { background: #f6efde; border: 2px solid #1c1a16; box-shadow: 6px 6px 0 #b8ad94; padding: 28px 32px; }
+    .card h3 { font-family: "VT323", monospace; font-size: 38px; line-height: 1; margin-bottom: 14px; }
+    .card .check { color: #4a7042; font-weight: 600; }
+    .card .x { color: #a04a2c; font-weight: 600; }
+    .card ul { list-style: none; }
+    .card li { font-size: 15px; line-height: 1.7; padding-left: 24px; position: relative; }
+    .card li:before { position: absolute; left: 0; top: 0; }
+    .card.does li:before { content: "✓"; color: #4a7042; }
+    .card.does\.not li:before { content: "✗"; color: #a04a2c; }
+    .footer { margin-top: 56px; display: flex; justify-content: space-between; font-size: 14px; letter-spacing: 0.18em; text-transform: uppercase; color: #6b6356; }
+  </style>
+</head>
+<body>
+  <h2>what otto does <em>and doesn't do</em></h2>
+  <div class="grid">
+    <div class="card does">
+      <h3 class="check">otto does</h3>
+      <ul>
+        <li>read cloud recording transcripts</li>
+        <li>read ai companion summaries</li>
+        <li>extract code-shaped action items</li>
+        <li>open small draft pull requests</li>
+        <li>attach transcript excerpts to each pr</li>
+        <li>flag low-confidence items for human review</li>
+      </ul>
+    </div>
+    <div class="card does.not">
+      <h3 class="x">otto never</h3>
+      <ul>
+        <li>joins your zoom meetings</li>
+        <li>downloads audio or video files</li>
+        <li>auto-merges anything</li>
+        <li>writes data back to zoom</li>
+        <li>creates, modifies, or deletes zoom users</li>
+        <li>ships large or speculative refactors</li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer">
+    <span>your engineering agent · always reviewable · always opt-in</span>
+    <span style="color: #a87528">ottoagent.app</span>
+  </div>
+</body>
+</html>
