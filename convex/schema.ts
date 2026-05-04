@@ -42,6 +42,7 @@ export default defineSchema({
       v.literal("granola"),
       v.literal("zoom"),
       v.literal("google_meet"),
+      v.literal("cursor"),
     ),
     enabled: v.boolean(),
     // Platform-specific config shape:

@@ -50,6 +50,12 @@ export function OnboardingTab() {
         apiKeyConfigured: boolean;
       }
     | undefined;
+  const cursorStatus = useQuery(
+    api.cursorDb.status,
+    teamId ? { teamId } : "skip",
+  ) as
+    | { configured: boolean; enabled: boolean; keyHint: string | null }
+    | undefined;
 
   const flags = useMemo(() => {
     if (!items) return null;
@@ -222,6 +228,41 @@ export function OnboardingTab() {
 
       <Step
         n={5}
+        glyph="task"
+        title="add cursor api key"
+        status={
+          cursorStatus === undefined
+            ? "checking"
+            : cursorStatus.configured
+              ? "ready"
+              : "needed"
+        }
+        verify={
+          cursorStatus?.configured
+            ? `key on file (${cursorStatus.keyHint ?? "•••"})`
+            : "no cursor key on this team"
+        }
+      >
+        <p>
+          otto fires diffs through the cursor agent. paste your team&rsquo;s
+          cursor api key — otto stores it in this deployment&rsquo;s database
+          and uses it only when opening draft prs from items routed to your
+          repos.
+        </p>
+        <CursorKeyForm
+          configured={!!cursorStatus?.configured}
+          keyHint={cursorStatus?.keyHint ?? null}
+          teamId={teamId}
+        />
+        <Hint>
+          generate the key from cursor → settings → api keys. you can clear it
+          at any time below; otto immediately stops firing for this team if no
+          key is set.
+        </Hint>
+      </Step>
+
+      <Step
+        n={6}
         glyph="ripple"
         title="connect slack"
         status={flags?.slack ? "ready" : "needed"}
@@ -848,6 +889,105 @@ function GranolaKeyForm({
               msg.kind === "ok"
                 ? "var(--otto-green)"
                 : "var(--otto-red)",
+          }}
+        >
+          {msg.text}
+        </p>
+      )}
+    </div>
+  );
+}
+
+function CursorKeyForm({
+  configured,
+  keyHint,
+  teamId,
+}: {
+  configured: boolean;
+  keyHint: string | null;
+  teamId: TeamId | null;
+}) {
+  const save = useMutation(api.cursorDb.saveKey);
+  const clear = useMutation(api.cursorDb.clearKey);
+  const [draft, setDraft] = useState("");
+  const [busy, setBusy] = useState<"idle" | "saving" | "clearing">("idle");
+  const [msg, setMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(
+    null,
+  );
+
+  const onSave = async () => {
+    if (!draft.trim() || !teamId) return;
+    setBusy("saving");
+    setMsg(null);
+    try {
+      await save({ teamId, apiKey: draft });
+      setMsg({ kind: "ok", text: "key saved" });
+      setDraft("");
+    } catch (e) {
+      setMsg({ kind: "err", text: (e as Error).message });
+    } finally {
+      setBusy("idle");
+    }
+  };
+
+  const onClear = async () => {
+    if (!teamId) return;
+    setBusy("clearing");
+    setMsg(null);
+    try {
+      await clear({ teamId });
+      setMsg({ kind: "ok", text: "key cleared" });
+    } catch (e) {
+      setMsg({ kind: "err", text: (e as Error).message });
+    } finally {
+      setBusy("idle");
+    }
+  };
+
+  return (
+    <div className="cursor-key">
+      <label htmlFor="cursor-key-input" className="otto-eyebrow">
+        cursor api key
+      </label>
+      <div className="row" style={{ gap: 8, marginTop: 6 }}>
+        <input
+          id="cursor-key-input"
+          type="password"
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          placeholder={
+            configured ? `${keyHint ?? "••••••"} (replace existing)` : "cu_…"
+          }
+          autoComplete="off"
+          spellCheck={false}
+          style={{ flex: 1, fontFamily: "var(--otto-font-mono)" }}
+        />
+        <button
+          type="button"
+          className="primary"
+          disabled={!draft.trim() || busy !== "idle"}
+          onClick={onSave}
+        >
+          {busy === "saving" ? "saving…" : configured ? "replace" : "save"}
+        </button>
+        {configured && (
+          <button
+            type="button"
+            className="danger"
+            disabled={busy !== "idle"}
+            onClick={onClear}
+          >
+            {busy === "clearing" ? "…" : "clear"}
+          </button>
+        )}
+      </div>
+      {msg && (
+        <p
+          className="otto-eyebrow"
+          style={{
+            marginTop: 8,
+            color:
+              msg.kind === "ok" ? "var(--otto-green)" : "var(--otto-red)",
           }}
         >
           {msg.text}
