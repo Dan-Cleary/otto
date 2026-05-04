@@ -40,10 +40,13 @@ export const recordReviewMessage = internalMutation({
 export const findItemBySlackTs = internalQuery({
   args: { channel: v.string(), ts: v.string() },
   handler: async (ctx, { channel, ts }) =>
+    // (channel, ts) uniquely identifies a Slack message. Use unique()
+    // so a stray duplicate raises a loud error instead of silently
+    // routing the action to whichever row happens to come back first.
     ctx.db
       .query("items")
       .withIndex("by_slack", (q) =>
         q.eq("slackChannel", channel).eq("slackTs", ts),
       )
-      .first(),
+      .unique(),
 });

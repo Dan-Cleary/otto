@@ -66,14 +66,21 @@ export async function requireTeamAdmin(
   return { ...m, role: "admin" };
 }
 
-// Action-context variant. Actions don't have ctx.db, so we round-trip
-// through an internal query to fetch the user record.
-export async function requireAdminAction(ctx: ActionCtx): Promise<{
+// Action-context variant: returns the authenticated user. Despite the
+// historical name, this does NOT verify admin role on its own — pair
+// it with internal.<integration>Db.ensureTeamAdmin for the admin gate.
+// Actions don't have ctx.db, so we round-trip through an internal
+// query to fetch the user record.
+export async function requireAuthAction(ctx: ActionCtx): Promise<{
   userId: string;
   email: string;
 }> {
   return ctx.runQuery(internal.authDb.currentUser, {});
 }
+
+// Backwards-compat alias. New call sites should use requireAuthAction
+// + an explicit ensureTeamAdmin runQuery.
+export const requireAdminAction = requireAuthAction;
 
 // Mutation-context: ensure the user has at least one team. If not,
 // bootstrap a personal team (or claim the legacy data set if they're
@@ -136,8 +143,11 @@ export async function ensureTeamForUser(
 }
 
 // Cheap probe: does any team-scoped table contain a row that pre-dates
-// the multi-tenant refactor (i.e. has no teamId)? We only need to find
-// one such row to know we should run the legacy claim path.
+// the multi-tenant refactor (i.e. has no teamId)? We sample up to 50
+// rows per table because Convex doesn't guarantee ordering — just
+// looking at .first() can miss a legacy row sitting behind a
+// post-refactor row.
+const ORPHAN_PROBE_LIMIT = 50;
 async function hasOrphanRows(ctx: MutationCtx): Promise<boolean> {
   for (const tableName of [
     "projects",
@@ -148,11 +158,12 @@ async function hasOrphanRows(ctx: MutationCtx): Promise<boolean> {
     "auditLog",
     "settings",
   ] as const) {
-    const sample = await ctx.db.query(tableName).first();
+    const sample = await ctx.db.query(tableName).take(ORPHAN_PROBE_LIMIT);
     if (
-      sample &&
-      ((sample as any).teamId === undefined ||
-        (sample as any).teamId === null)
+      sample.some(
+        (r) =>
+          (r as any).teamId === undefined || (r as any).teamId === null,
+      )
     ) {
       return true;
     }

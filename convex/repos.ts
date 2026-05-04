@@ -60,16 +60,28 @@ export const reindexAll = internalAction({
   },
 });
 
+const GITHUB_TIMEOUT_MS = 15_000;
+
 async function ghFetch(path: string, token: string): Promise<any> {
-  const res = await fetch(`https://api.github.com${path}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      Accept: "application/vnd.github+json",
-      "User-Agent": "otto",
-    },
-  });
-  if (!res.ok) return null;
-  return res.json();
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), GITHUB_TIMEOUT_MS);
+  try {
+    const res = await fetch(`https://api.github.com${path}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/vnd.github+json",
+        "User-Agent": "otto",
+      },
+      signal: ctrl.signal,
+    });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    // network error or timeout — caller treats null as "no data"
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 async function fetchReadme(full: string, token: string): Promise<string> {

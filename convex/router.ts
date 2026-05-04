@@ -21,16 +21,38 @@ export const route = internalAction({
     });
     const queryVec = embed.data[0]!.embedding;
 
-    const repoMatches = await ctx.vectorSearch("repos", "by_embedding", {
+    // Tenant scoping: vector search must be filtered to the item's
+    // team so we never surface another team's repo as a match. Convex
+    // vector filters only support a single q.eq per call; we filter by
+    // teamId at the index level (when present) and then drop disabled
+    // rows on the result side. Items without teamId (legacy) fall back
+    // to enabled-only search, which is fine since legacy rows were
+    // single-tenant.
+    const teamId = item.teamId ?? null;
+    const rawRepoMatches = await ctx.vectorSearch("repos", "by_embedding", {
       vector: queryVec,
-      limit: TOP_K,
-      filter: (q) => q.eq("enabled", true),
+      limit: TOP_K * 4,
+      filter: teamId
+        ? (q) => q.eq("teamId", teamId)
+        : (q) => q.eq("enabled", true),
     });
+    const repoMatches: { _id: any; _score: number }[] = [];
+    for (const m of rawRepoMatches) {
+      if (repoMatches.length >= TOP_K) break;
+      const repo = await ctx.runQuery(internal.routerDb.getRepo, {
+        repoId: m._id,
+      });
+      if (repo?.enabled) repoMatches.push(m);
+    }
 
     const memoryMatches = await ctx.vectorSearch(
       "routingMemory",
       "by_embedding",
-      { vector: queryVec, limit: 3 },
+      {
+        vector: queryVec,
+        limit: 3,
+        filter: teamId ? (q) => q.eq("teamId", teamId) : undefined,
+      },
     );
 
     await ctx.runMutation(internal.routerDb.applyRoute, {
