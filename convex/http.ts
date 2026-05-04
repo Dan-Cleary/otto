@@ -179,6 +179,67 @@ function escapeHtml(s: string): string {
   );
 }
 
+// GitHub App webhook receiver. We subscribe to installation,
+// installation_target, and pull_request events. The handler verifies
+// the x-hub-signature-256 HMAC, then dispatches.
+http.route({
+  path: "/github/webhook",
+  method: "POST",
+  handler: httpAction(async (ctx, req) => {
+    const secret = process.env.GITHUB_APP_WEBHOOK_SECRET;
+    if (!secret) {
+      return new Response("github webhook not configured", { status: 503 });
+    }
+
+    const raw = await req.text();
+    const sig = req.headers.get("x-hub-signature-256");
+    const ok = await verifyGithubSignature(secret, raw, sig);
+    if (!ok) return new Response("bad signature", { status: 401 });
+
+    const event = req.headers.get("x-github-event") ?? "";
+    let body: any;
+    try {
+      body = JSON.parse(raw);
+    } catch {
+      return new Response("bad json", { status: 400 });
+    }
+
+    if (event === "installation" || event === "installation_target") {
+      await ctx.runAction(internal.github.handleInstallationEvent, {
+        event,
+        payload: body,
+      });
+    }
+    // Other events (pull_request) are accepted (200) but not yet
+    // wired — they'll feed into a future "PR opened/merged" timeline.
+    return new Response("", { status: 200 });
+  }),
+});
+
+async function verifyGithubSignature(
+  secret: string,
+  raw: string,
+  header: string | null,
+): Promise<boolean> {
+  if (!header || !header.startsWith("sha256=")) return false;
+  const key = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  const macBuf = await crypto.subtle.sign(
+    "HMAC",
+    key,
+    new TextEncoder().encode(raw),
+  );
+  const hex = [...new Uint8Array(macBuf)]
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+  return timingSafeEqual(`sha256=${hex}`, header);
+}
+
 // Zoom webhook receiver. Two responsibilities:
 //   1. Endpoint validation: respond to Zoom's `endpoint.url_validation`
 //      challenge with the HMAC-SHA256 of the plainToken using our

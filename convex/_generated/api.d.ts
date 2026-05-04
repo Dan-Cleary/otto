@@ -16,6 +16,8 @@ import type * as crons from "../crons.js";
 import type * as cursor from "../cursor.js";
 import type * as cursorDb from "../cursorDb.js";
 import type * as cursorPrompt from "../cursorPrompt.js";
+import type * as github from "../github.js";
+import type * as githubDb from "../githubDb.js";
 import type * as granola from "../granola.js";
 import type * as granolaDb from "../granolaDb.js";
 import type * as http from "../http.js";
@@ -48,6 +50,8 @@ declare const fullApi: ApiFromModules<{
   cursor: typeof cursor;
   cursorDb: typeof cursorDb;
   cursorPrompt: typeof cursorPrompt;
+  github: typeof github;
+  githubDb: typeof githubDb;
   granola: typeof granola;
   granolaDb: typeof granolaDb;
   http: typeof http;

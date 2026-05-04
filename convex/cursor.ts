@@ -38,9 +38,18 @@ export const fire = internalAction({
       routerConfidence: ctxData.item.routerConfidence,
     });
 
+    const apiKey = ctxData.cursorApiKey ?? process.env.CURSOR_API_KEY;
+    if (!apiKey) {
+      await ctx.runMutation(internal.cursorDb.markFailed, {
+        itemId,
+        reason:
+          "no cursor api key configured for this team (set in onboarding) and no fallback in env",
+      });
+      return;
+    }
     const modelId = process.env.OTTO_CURSOR_MODEL;
     const agent = await Agent.create({
-      apiKey: process.env.CURSOR_API_KEY!,
+      apiKey,
       ...(modelId ? { model: { id: modelId } } : {}),
       cloud: {
         repos: [{ url: ctxData.repo.githubUrl, startingRef: "main" }],
