@@ -134,6 +134,7 @@ export function OnboardingTab() {
         title="drop the widget"
         status={flags?.widget ? "ready" : "needed"}
         verify="otto sees a widget event"
+        required="optional"
       >
         <p>
           build the bundle with <code>npm run widget:build</code>, host{" "}
@@ -179,6 +180,7 @@ export function OnboardingTab() {
                 : "needed"
         }
         verify={granolaVerifyLine(granolaStatus)}
+        required="one-of-required"
       >
         <p>
           granola has no webhook system. otto pulls new meeting notes off
@@ -209,6 +211,7 @@ export function OnboardingTab() {
               : "needed"
         }
         verify={zoomVerifyLine(zoomStatus)}
+        required="one-of-required"
       >
         <p>
           otto pulls cloud-recording transcripts from zoom on a 5-minute
@@ -224,6 +227,7 @@ export function OnboardingTab() {
         title="register a repo"
         status={reposReady ? "ready" : "needed"}
         verify="at least one repo is enabled"
+        required="optional"
       >
         <p>
           otto routes drafts to whatever repos you&rsquo;ve enabled. add the
@@ -254,6 +258,7 @@ export function OnboardingTab() {
             ? `key on file (${cursorStatus.keyHint ?? "•••"})`
             : "no cursor key on this team"
         }
+        required="required"
       >
         <p>
           otto fires diffs through the cursor agent. paste your team&rsquo;s
@@ -289,6 +294,7 @@ export function OnboardingTab() {
             ? `installed on ${githubStatus.accountLogin ?? "github"}`
             : "no github app installation on this team"
         }
+        required="required"
       >
         <p>
           otto opens draft pull requests through a per-team github app
@@ -310,6 +316,7 @@ export function OnboardingTab() {
         title="connect slack"
         status={flags?.slack ? "ready" : "needed"}
         verify="otto has queued at least one item"
+        required="optional"
       >
         <p>
           low-confidence items go to a slack review channel instead of firing
@@ -393,6 +400,7 @@ function Step({
   title,
   status,
   verify,
+  required,
   children,
 }: {
   n: number;
@@ -400,6 +408,7 @@ function Step({
   title: string;
   status: StepStatus;
   verify: string;
+  required?: "required" | "one-of-required" | "optional";
   children: React.ReactNode;
 }) {
   return (
@@ -408,6 +417,27 @@ function Step({
         <span className="step-num">{String(n).padStart(2, "0")}</span>
         <OttoGlyphIcon name={glyph} size={20} />
         <h3>{title}</h3>
+        {required && (
+          <span
+            className="otto-eyebrow"
+            style={{
+              fontSize: 10,
+              padding: "2px 6px",
+              border: "1px solid var(--otto-ink, #1c1a16)",
+              background:
+                required === "optional"
+                  ? "transparent"
+                  : "var(--otto-amber-soft, #f0d9a8)",
+              color: "var(--otto-ink, #1c1a16)",
+            }}
+          >
+            {required === "required"
+              ? "required"
+              : required === "one-of-required"
+                ? "required (pick one)"
+                : "optional"}
+          </span>
+        )}
         <span className={`step-pill is-${status}`}>{statusLabel(status)}</span>
       </header>
       <div className="step-body">{children}</div>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AuditTab } from "./tabs/AuditTab";
 import { ProjectsTab } from "./tabs/ProjectsTab";
 import { ReposTab } from "./tabs/ReposTab";
@@ -9,6 +9,7 @@ import { OnboardingTab } from "./tabs/OnboardingTab";
 import { OttoWordmark } from "./Otto";
 import { SignOutButton } from "./auth";
 import { TeamProvider, useTeam, type TeamId } from "./teamContext";
+import { useSetupStatus, SetupBanner } from "./SetupStatus";
 
 const TABS = [
   { id: "audit", label: "Activity", Comp: AuditTab },
@@ -29,9 +30,42 @@ export function App() {
 }
 
 function Inner() {
-  const [tab, setTab] = useState<(typeof TABS)[number]["id"]>("audit");
-  const Comp = TABS.find((t) => t.id === tab)!.Comp;
   const { teamId, teams, switchTeam, bootstrapping } = useTeam();
+  const setup = useSetupStatus(teamId);
+
+  // First-signin default: a fresh user with no required setup done
+  // lands on onboarding instead of an empty Activity tab. The choice
+  // is sticky once they navigate (we record it in localStorage), so
+  // we don't keep forcing the Onboarding tab on every page load.
+  const [tab, setTab] = useState<(typeof TABS)[number]["id"]>(() => {
+    const saved =
+      typeof window !== "undefined"
+        ? (window.localStorage.getItem("otto.lastTab") as
+            | (typeof TABS)[number]["id"]
+            | null)
+        : null;
+    return saved ?? "audit";
+  });
+  const Comp = TABS.find((t) => t.id === tab)!.Comp;
+
+  // Once setup status loads, if the user is fresh (nothing done) and
+  // has not picked a tab yet this session, route them to onboarding.
+  useEffect(() => {
+    if (setup.loading) return;
+    const saved =
+      typeof window !== "undefined"
+        ? window.localStorage.getItem("otto.lastTab")
+        : null;
+    if (!saved && setup.done === 0) setTab("onboarding");
+  }, [setup.loading, setup.done]);
+
+  // Persist the selected tab so refreshes don't bounce people back
+  // to onboarding once they've started exploring.
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("otto.lastTab", tab);
+    }
+  }, [tab]);
 
   return (
     <div className="shell">
@@ -57,6 +91,7 @@ function Inner() {
           </button>
         ))}
       </div>
+      <SetupBanner status={setup} onResume={() => setTab("onboarding")} />
       {!teamId ? (
         <p className="muted" style={{ marginTop: 24 }}>
           {bootstrapping || teams === undefined
