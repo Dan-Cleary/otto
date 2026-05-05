@@ -295,121 +295,6 @@
       color: var(--ink);
     }
 
-    /* ── Surfaces ─────────────────────────────────────────── */
-    .surfaces {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 16px;
-    }
-    .surface {
-      background: var(--cream);
-      border: 1px solid var(--hair);
-      padding: 22px 22px 24px;
-      display: flex;
-      gap: 16px;
-      align-items: flex-start;
-    }
-    .surface img { flex-shrink: 0; }
-    .surface .body { flex: 1; }
-    .surface h4 {
-      font-family: var(--display);
-      font-size: 22px;
-      margin: 0 0 4px;
-      line-height: 1;
-    }
-    .surface .where {
-      font-family: var(--mono);
-      font-size: 10px;
-      letter-spacing: var(--eyebrow);
-      text-transform: uppercase;
-      color: var(--pencil);
-      margin-bottom: 10px;
-    }
-    .surface p {
-      margin: 0;
-      font-family: var(--mono);
-      font-size: 12px;
-      color: var(--ink);
-      line-height: 1.55;
-    }
-
-    /* ── Quote / voice ────────────────────────────────────── */
-    .quote {
-      background: var(--cream);
-      border: 1px solid var(--ink);
-      box-shadow: 6px 6px 0 var(--hair);
-      padding: 32px 32px 28px;
-      position: relative;
-    }
-    .quote .from {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-family: var(--mono);
-      font-size: 10px;
-      letter-spacing: var(--eyebrow);
-      text-transform: uppercase;
-      color: var(--pencil);
-      margin-bottom: 12px;
-    }
-    .quote blockquote {
-      margin: 0;
-      font-family: var(--mono);
-      font-size: 14px;
-      line-height: 1.65;
-      color: var(--ink);
-      border-left: 4px solid var(--amber);
-      padding: 4px 0 4px 16px;
-    }
-    .quote blockquote::before { content: "otto: "; color: var(--amber-dim); }
-
-    /* ── Daybook (mini queue) ─────────────────────────────── */
-    .board {
-      background: var(--bg);
-      border: 1px solid var(--ink);
-      box-shadow: 4px 4px 0 var(--hair);
-    }
-    .board .head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 16px;
-      background: var(--panel);
-      border-bottom: 1px solid var(--hair);
-    }
-    .board .head .left { display: inline-flex; align-items: center; gap: 10px; }
-    .board .head .name { font-family: var(--display); font-size: 22px; line-height: 1; }
-    .board .head .pill {
-      font-family: var(--mono);
-      font-size: 10px;
-      color: var(--pencil);
-      letter-spacing: var(--eyebrow);
-      text-transform: uppercase;
-    }
-    .row {
-      display: grid;
-      grid-template-columns: 70px 1fr 130px 90px;
-      gap: 12px;
-      padding: 10px 16px;
-      border-bottom: 1px dashed var(--hair);
-      align-items: center;
-      font-size: 12px;
-    }
-    .row:last-child { border-bottom: 0; }
-    .row .id { font-family: var(--mono); color: var(--pencil); font-size: 11px; }
-    .row .repo { font-family: var(--mono); color: var(--pencil); font-size: 10px; }
-    .badge {
-      font-family: var(--mono);
-      font-size: 10px;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      text-align: right;
-    }
-    .badge.drafted { color: var(--green); }
-    .badge.routing { color: var(--amber); }
-    .badge.extract { color: var(--amber-dim); }
-    .badge.error   { color: var(--red); }
-
     /* ── Final CTA ────────────────────────────────────────── */
     .end {
       max-width: 1080px;
@@ -453,9 +338,6 @@
       .steps { grid-template-columns: 1fr; }
       .step { border-right: 0; border-bottom: 1px dashed var(--hair); }
       .step:last-child { border-bottom: 0; }
-      .surfaces { grid-template-columns: 1fr; }
-      .row { grid-template-columns: 60px 1fr 80px; }
-      .row .repo { display: none; }
     }
 
     @media (max-width: 480px) {
@@ -486,29 +368,6 @@
       .step { padding: 22px 18px 24px; gap: 12px; }
       .step h3 { font-size: 22px; }
       .step .num { font-size: 36px; }
-
-      /* Surfaces stack within each row */
-      .surface { padding: 18px 16px; flex-direction: row; gap: 14px; }
-      .surface h4 { font-size: 18px; }
-      .surface p { font-size: 11px; }
-      .surface .where { font-size: 9px; }
-
-      /* Mini daybook board */
-      .board .head { padding: 10px 12px; }
-      .board .head .name { font-size: 18px; }
-      .board .head img { width: 32px; height: 32px; }
-      .board .head .pill { font-size: 9px; }
-      .row { grid-template-columns: 52px 1fr 64px; padding: 9px 12px; font-size: 11px; gap: 8px; }
-      .row .id { font-size: 10px; }
-      .row .badge { font-size: 9px; }
-      .row span:nth-child(2) { /* meeting title */
-        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-      }
-
-      /* Voice quote */
-      .quote { padding: 22px 20px 20px; }
-      .quote blockquote { font-size: 13px; padding-left: 12px; }
-      .quote .from { font-size: 9px; }
 
       /* End section */
       .end { padding: 64px 20px 80px; }

@@ -205,6 +205,7 @@ export function IntegrationGlyph({
   // mask-image so we can set color via CSS background.
   return (
     <span
+      className="otto-glyph"
       role="img"
       aria-label={name}
       style={{
