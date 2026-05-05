@@ -87,6 +87,16 @@
     }
     .nav-links a { color: var(--pencil); text-decoration: none; }
     .nav-links a:hover { color: var(--ink); }
+    .nav-links a.nav-cta {
+      background: var(--ink);
+      color: var(--cream);
+      padding: 6px 12px;
+      letter-spacing: var(--eyebrow);
+    }
+    .nav-links a.nav-cta:hover {
+      background: var(--amber-dim);
+      color: var(--cream);
+    }
 
     /* ── Hero ─────────────────────────────────────────────── */
     .hero {
@@ -449,10 +459,10 @@
     }
 
     @media (max-width: 480px) {
-      /* Top nav: hide the in-page links, keep the lockup + dashboard CTA. */
+      /* Top nav: hide in-page links; keep log in + sign up. */
       .nav { padding: 16px 20px; }
       .nav-links { gap: 12px; font-size: 10px; }
-      .nav-links a:not([href="/login"]) { display: none; }
+      .nav-links a:not([href="/login"]):not([href="/signup"]) { display: none; }
       .lockup .name { font-size: 22px; }
       .lockup img { width: 28px; height: 28px; }
       .version { font-size: 12px; padding: 1px 5px 0; }
@@ -520,8 +530,8 @@
     </span>
     <span class="nav-links">
       <a href="#how">how it works</a>
-      <a href="#voice">voice</a>
-      <a href="/login">dashboard</a>
+      <a href="/login">log in</a>
+      <a href="/signup" class="nav-cta">sign up</a>
     </span>
   </nav>
 
@@ -536,7 +546,7 @@
         <strong>never auto-merges.</strong>
       </p>
       <div class="cta">
-        <a href="/login" class="btn btn-primary">open dashboard</a>
+        <a href="/signup" class="btn btn-primary">get started</a>
         <a href="#how" class="btn btn-ghost">see how it works</a>
       </div>
     </div>
@@ -596,69 +606,6 @@
     </div>
   </section>
 
-  <!-- ── Voice ──────────────────────────────────────────────── -->
-  <section id="voice">
-    <p class="eyebrow">voice <span class="sep">//</span> first-person, brief</p>
-    <h2>how otto talks</h2>
-    <p class="section-lede">
-      otto writes its own pr descriptions. brief, first-person, never peppy.
-    </p>
-
-    <div class="quote">
-      <div class="from">
-        <img src="/otto/sprites/otter-done.svg" width="28" height="28" alt="otto" />
-        otto · pr #284 · acme/web
-      </div>
-      <blockquote>
-        i drafted this from widget feedback. the export button on the orders
-        dashboard fires even with zero rows selected. added a disabled state
-        and an aria-disabled hint. tests pass locally. the original report is
-        linked below — please confirm the empty-state copy reads okay.
-      </blockquote>
-    </div>
-  </section>
-
-  <!-- ── Mini queue ─────────────────────────────────────────── -->
-  <section>
-    <p class="eyebrow">live <span class="sep">//</span> the queue right now</p>
-    <h2>today&rsquo;s daybook</h2>
-    <p class="section-lede">a snapshot of what otto&rsquo;s holding.</p>
-
-    <div class="board">
-      <div class="head">
-        <span class="left">
-          <img src="/otto/sprites/otter-idle.svg" width="40" height="40" alt="otto" />
-          <span class="name">otto</span>
-        </span>
-        <span class="pill">3 in queue · 11 today</span>
-      </div>
-      <div class="row">
-        <span class="id">#284</span>
-        <span>add disabled state to orders export button</span>
-        <span class="repo">acme/web</span>
-        <span class="badge drafted">drafted</span>
-      </div>
-      <div class="row">
-        <span class="id">#283</span>
-        <span>fix sticky header overlap on settings page</span>
-        <span class="repo">acme/web</span>
-        <span class="badge routing">routing</span>
-      </div>
-      <div class="row">
-        <span class="id">#282</span>
-        <span>extract metric definitions from meeting notes</span>
-        <span class="repo">acme/docs</span>
-        <span class="badge extract">extract</span>
-      </div>
-      <div class="row">
-        <span class="id">#281</span>
-        <span>could not route — unknown component reference</span>
-        <span class="repo">acme/api</span>
-        <span class="badge error">error</span>
-      </div>
-    </div>
-  </section>
-
   <!-- ── Final CTA ──────────────────────────────────────────── -->
   <section class="end">
     <p class="eyebrow">get started <span class="sep">//</span> early access</p>
@@ -668,8 +615,8 @@
       — every diff waits for a human.
     </p>
     <div class="cta" style="justify-content:center;">
-      <a href="/login" class="btn btn-primary">open dashboard</a>
-      <a href="#how" class="btn btn-ghost">how it works</a>
+      <a href="/signup" class="btn btn-primary">sign up</a>
+      <a href="/login" class="btn btn-ghost">log in</a>
     </div>
   </section>
 
