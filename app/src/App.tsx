@@ -62,10 +62,11 @@ function Inner() {
   // Persist the selected tab so refreshes don't bounce people back
   // to onboarding once they've started exploring.
   useEffect(() => {
+    if (setup.loading) return;
     if (typeof window !== "undefined") {
       window.localStorage.setItem("otto.lastTab", tab);
     }
-  }, [tab]);
+  }, [tab, setup.loading]);
 
   return (
     <div className="shell">
