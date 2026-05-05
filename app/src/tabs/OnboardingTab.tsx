@@ -250,7 +250,7 @@ export function OnboardingTab() {
         n={4}
         glyph="task"
         title="register a repo"
-        status={reposReady ? "ready" : "needed"}
+        status={reposStepStatus}
         verify="at least one repo is enabled"
       >
         <p>
