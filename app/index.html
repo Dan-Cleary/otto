@@ -261,6 +261,16 @@
       text-transform: uppercase;
       color: var(--pencil);
     }
+    /* Integration logos use a CSS mask so they pick up brand color
+       without committing currentColor inside each SVG. */
+    .integration-glyph {
+      display: inline-block;
+      width: 20px; height: 20px;
+      background-color: var(--amber-dim, #a87528);
+      -webkit-mask: var(--g-url) no-repeat center / contain;
+      mask: var(--g-url) no-repeat center / contain;
+      vertical-align: middle;
+    }
     .step h3 {
       font-family: var(--display);
       font-size: 26px;
@@ -546,8 +556,9 @@
       <div class="step">
         <div class="num">01</div>
         <div class="glyph-row">
-          <img src="/otto/glyphs/glyph-notebook.svg" width="20" height="20" alt="notebook" />
+          <span class="integration-glyph" style="--g-url:url(/otto/integrations/granola.svg)" aria-label="granola"></span>
           granola <span style="color:#8a8270">/</span> zoom
+          <span class="integration-glyph" style="--g-url:url(/otto/integrations/zoom.svg)" aria-label="zoom"></span>
         </div>
         <h3>otto listens</h3>
         <p>

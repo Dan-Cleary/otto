@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useAction, useMutation, useQuery } from "convex/react";
 import { api } from "../convexApi";
-import { OttoGlyphIcon, OttoSprite } from "../Otto";
+import { OttoGlyphIcon, OttoSprite, IntegrationGlyph, type IntegrationName } from "../Otto";
 import { useTeam, type TeamId } from "../teamContext";
 
 type StepStatus = "ready" | "needed" | "checking";
@@ -169,6 +169,7 @@ export function OnboardingTab() {
         n={2}
         glyph="notebook"
         title="connect granola"
+        platform="granola"
         status={
           flags?.granola
             ? "ready"
@@ -200,6 +201,7 @@ export function OnboardingTab() {
         n={3}
         glyph="ripple"
         title="connect zoom"
+        platform="zoom"
         status={
           zoomStatus === undefined
             ? "checking"
@@ -241,6 +243,7 @@ export function OnboardingTab() {
         n={5}
         glyph="task"
         title="add cursor api key"
+        platform="cursor"
         status={
           cursorStatus === undefined
             ? "checking"
@@ -276,6 +279,7 @@ export function OnboardingTab() {
         n={6}
         glyph="task"
         title="install github app"
+        platform="github"
         status={
           githubStatus === undefined
             ? "checking"
@@ -306,6 +310,7 @@ export function OnboardingTab() {
         n={7}
         glyph="ripple"
         title="connect slack"
+        platform="slack"
         status={flags?.slack ? "ready" : "needed"}
         verify="otto has queued at least one item"
         required="optional"
@@ -389,6 +394,7 @@ function ProgressStrip(props: {
 function Step({
   n,
   glyph,
+  platform,
   title,
   status,
   verify,
@@ -397,6 +403,7 @@ function Step({
 }: {
   n: number;
   glyph: "inbox" | "notebook" | "task" | "ripple";
+  platform?: IntegrationName;
   title: string;
   status: StepStatus;
   verify: string;
@@ -407,7 +414,11 @@ function Step({
     <section className={`step is-${status}`}>
       <header className="step-head">
         <span className="step-num">{String(n).padStart(2, "0")}</span>
-        <OttoGlyphIcon name={glyph} size={20} />
+        {platform ? (
+          <IntegrationGlyph name={platform} size={20} />
+        ) : (
+          <OttoGlyphIcon name={glyph} size={20} />
+        )}
         <h3>{title}</h3>
         {required && (
           <span

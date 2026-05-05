@@ -177,6 +177,45 @@ export function OttoGlyphIcon({
       alt={name}
       className={`otto-glyph ${className ?? ""}`}
       style={{ imageRendering: "pixelated", verticalAlign: "middle", ...style }}
+    />
+  );
+}
+
+/** Integration platform glyph. Loaded as a current-color SVG so it
+ *  inherits the surrounding text color (amber-dim by default in
+ *  step headers). */
+export type IntegrationName =
+  | "zoom" | "granola" | "github" | "cursor" | "slack" | "meet";
+
+export function IntegrationGlyph({
+  name,
+  size = 16,
+  color,
+  style,
+}: {
+  name: IntegrationName;
+  size?: number;
+  color?: string;
+  style?: CSSProperties;
+}) {
+  // currentColor inheritance only works when the SVG is inlined as
+  // <svg>, not when used as <img src>. Load via <object> so the SVG
+  // can read the surrounding color, OR use a CSS mask. Easiest is
+  // mask-image so we can set color via CSS background.
+  return (
+    <span
+      role="img"
+      aria-label={name}
+      style={{
+        display: "inline-block",
+        width: size,
+        height: size,
+        backgroundColor: color ?? "var(--otto-amber-dim, #a87528)",
+        WebkitMask: `url(/otto/integrations/${name}.svg) no-repeat center / contain`,
+        mask: `url(/otto/integrations/${name}.svg) no-repeat center / contain`,
+        verticalAlign: "middle",
+        ...style,
+      }}
       draggable={false}
     />
   );
