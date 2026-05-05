@@ -71,7 +71,7 @@ You can also download it locally from `app/public/app-icon.png` in this repo.
 ### Short description (max 80 chars)
 
 ```
-otto joins your meetings and ships the changes you discuss as draft pull requests.
+your meeting ends; otto ships the changes you discussed as draft pull requests.
 ```
 
 ### Long description (use markdown)
