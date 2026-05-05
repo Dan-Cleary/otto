@@ -107,8 +107,9 @@ export function OnboardingTab() {
         <div>
           <h1>wake otto up</h1>
           <p className="onboarding-lede">
-            three required steps to ship a draft pr: a cursor key, the
-            github app, and one meeting source. the rest is optional.
+            four required steps to ship a draft pr: a cursor key, the
+            github app, one meeting source, and at least one registered
+            repo. the rest is optional.
           </p>
         </div>
       </header>
