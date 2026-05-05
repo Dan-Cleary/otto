@@ -84,6 +84,43 @@ export function OnboardingTab() {
   }, [items]);
 
   const reposReady = !!(repos && repos.some((r) => r.enabled));
+  const reposStepStatus: StepStatus = reposReady
+    ? "ready"
+    : repos === undefined
+      ? "checking"
+      : "needed";
+  const granolaStepStatus: StepStatus =
+    flags?.granola
+      ? "ready"
+      : granolaStatus === undefined
+        ? "checking"
+        : granolaStatus.apiKeyConfigured
+          ? "ready"
+          : "needed";
+  const zoomStepStatus: StepStatus =
+    zoomStatus === undefined
+      ? "checking"
+      : zoomStatus.configured
+        ? "ready"
+        : "needed";
+  const cursorStepStatus: StepStatus =
+    cursorStatus === undefined
+      ? "checking"
+      : cursorStatus.configured
+        ? "ready"
+        : "needed";
+  const githubStepStatus: StepStatus =
+    githubStatus === undefined
+      ? "checking"
+      : githubStatus.configured
+        ? "ready"
+        : "needed";
+  const meetingSourceStepStatus: StepStatus =
+    granolaStepStatus === "ready" || zoomStepStatus === "ready"
+      ? "ready"
+      : granolaStepStatus === "checking" || zoomStepStatus === "checking"
+        ? "checking"
+        : "needed";
 
   const widgetSecret = useQuery(
     api.teams.widgetSecret,
@@ -103,7 +140,19 @@ export function OnboardingTab() {
   return (
     <div className="onboarding">
       <header className="onboarding-hero">
-        <OttoSprite size={72} state={allReady(flags, reposReady) ? "done" : "thinking"} />
+        <OttoSprite
+          size={72}
+          state={
+            allReady(
+              cursorStepStatus,
+              githubStepStatus,
+              meetingSourceStepStatus,
+              reposStepStatus,
+            )
+              ? "done"
+              : "thinking"
+          }
+        />
         <div>
           <h1>wake otto up</h1>
           <p className="onboarding-lede">
@@ -115,17 +164,10 @@ export function OnboardingTab() {
       </header>
 
       <ProgressStrip
-        widget={flags?.widget ? "ready" : items === undefined ? "checking" : "needed"}
-        granola={flags?.granola ? "ready" : items === undefined ? "checking" : "needed"}
-        zoom={
-          zoomStatus === undefined
-            ? "checking"
-            : zoomStatus.configured
-              ? "ready"
-              : "needed"
-        }
-        repos={reposReady ? "ready" : repos === undefined ? "checking" : "needed"}
-        slack={flags?.slack ? "ready" : items === undefined ? "checking" : "needed"}
+        cursor={cursorStepStatus}
+        github={githubStepStatus}
+        meetingSource={meetingSourceStepStatus}
+        repos={reposStepStatus}
       />
 
       <Step
@@ -170,15 +212,7 @@ export function OnboardingTab() {
         glyph="notebook"
         title="connect granola"
         platform="granola"
-        status={
-          flags?.granola
-            ? "ready"
-            : granolaStatus === undefined
-              ? "checking"
-              : granolaStatus.apiKeyConfigured
-                ? "ready"
-                : "needed"
-        }
+        status={granolaStepStatus}
         verify={granolaVerifyLine(granolaStatus)}
       >
         <p>
@@ -201,13 +235,7 @@ export function OnboardingTab() {
         glyph="ripple"
         title="connect zoom"
         platform="zoom"
-        status={
-          zoomStatus === undefined
-            ? "checking"
-            : zoomStatus.configured
-              ? "ready"
-              : "needed"
-        }
+        status={zoomStepStatus}
         verify={zoomVerifyLine(zoomStatus)}
       >
         <p>
@@ -241,13 +269,7 @@ export function OnboardingTab() {
         glyph="task"
         title="add cursor api key"
         platform="cursor"
-        status={
-          cursorStatus === undefined
-            ? "checking"
-            : cursorStatus.configured
-              ? "ready"
-              : "needed"
-        }
+        status={cursorStepStatus}
         verify={
           cursorStatus?.configured
             ? `key on file (${cursorStatus.keyHint ?? "•••"})`
@@ -276,13 +298,7 @@ export function OnboardingTab() {
         glyph="task"
         title="install github app"
         platform="github"
-        status={
-          githubStatus === undefined
-            ? "checking"
-            : githubStatus.configured
-              ? "ready"
-              : "needed"
-        }
+        status={githubStepStatus}
         verify={
           githubStatus?.configured
             ? `installed on ${githubStatus.accountLogin ?? "github"}`
@@ -350,18 +366,16 @@ export function OnboardingTab() {
 /* ─────────────────── pieces ─────────────────── */
 
 function ProgressStrip(props: {
-  widget: StepStatus;
-  granola: StepStatus;
-  zoom: StepStatus;
+  cursor: StepStatus;
+  github: StepStatus;
+  meetingSource: StepStatus;
   repos: StepStatus;
-  slack: StepStatus;
 }) {
   const cells = [
-    { name: "widget", status: props.widget },
-    { name: "granola", status: props.granola },
-    { name: "zoom", status: props.zoom },
+    { name: "cursor", status: props.cursor },
+    { name: "github", status: props.github },
+    { name: "meeting source", status: props.meetingSource },
     { name: "repos", status: props.repos },
-    { name: "slack", status: props.slack },
   ];
   const ready = cells.filter((c) => c.status === "ready").length;
   return (
@@ -483,10 +497,17 @@ function statusLabel(s: StepStatus): string {
 }
 
 function allReady(
-  flags: { widget: boolean; granola: boolean; slack: boolean } | null,
-  reposReady: boolean,
+  cursor: StepStatus,
+  github: StepStatus,
+  meetingSource: StepStatus,
+  repos: StepStatus,
 ): boolean {
-  return !!flags && flags.widget && flags.granola && flags.slack && reposReady;
+  return (
+    cursor === "ready" &&
+    github === "ready" &&
+    meetingSource === "ready" &&
+    repos === "ready"
+  );
 }
 
 function zoomVerifyLine(
