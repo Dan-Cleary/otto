@@ -177,6 +177,7 @@ export function OttoGlyphIcon({
       alt={name}
       className={`otto-glyph ${className ?? ""}`}
       style={{ imageRendering: "pixelated", verticalAlign: "middle", ...style }}
+      draggable={false}
     />
   );
 }
@@ -216,7 +217,6 @@ export function IntegrationGlyph({
         verticalAlign: "middle",
         ...style,
       }}
-      draggable={false}
     />
   );
 }
