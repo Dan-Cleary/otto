@@ -209,7 +209,6 @@ export function IntegrationGlyph({
       role="img"
       aria-label={name}
       style={{
-        display: "inline-block",
         width: size,
         height: size,
         backgroundColor: color ?? "var(--otto-amber-dim, #a87528)",
