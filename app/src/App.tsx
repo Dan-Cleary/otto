@@ -21,6 +21,10 @@ const TABS = [
   { id: "onboarding", label: "Onboarding", Comp: OnboardingTab },
 ] as const;
 
+function isTabId(value: string): value is (typeof TABS)[number]["id"] {
+  return TABS.some((tab) => tab.id === value);
+}
+
 export function App() {
   return (
     <TeamProvider>
@@ -38,13 +42,9 @@ function Inner() {
   // is sticky once they navigate (we record it in localStorage), so
   // we don't keep forcing the Onboarding tab on every page load.
   const [tab, setTab] = useState<(typeof TABS)[number]["id"]>(() => {
-    const saved =
-      typeof window !== "undefined"
-        ? (window.localStorage.getItem("otto.lastTab") as
-            | (typeof TABS)[number]["id"]
-            | null)
-        : null;
-    return saved ?? "audit";
+    if (typeof window === "undefined") return "audit";
+    const saved = window.localStorage.getItem("otto.lastTab");
+    return saved && isTabId(saved) ? saved : "audit";
   });
   const Comp = TABS.find((t) => t.id === tab)!.Comp;
 
@@ -56,8 +56,8 @@ function Inner() {
       typeof window !== "undefined"
         ? window.localStorage.getItem("otto.lastTab")
         : null;
-    if (!saved && setup.done === 0) setTab("onboarding");
-  }, [setup.loading, setup.done]);
+    if (!saved && tab === "audit" && setup.done === 0) setTab("onboarding");
+  }, [setup.loading, setup.done, tab]);
 
   // Persist the selected tab so refreshes don't bounce people back
   // to onboarding once they've started exploring.
