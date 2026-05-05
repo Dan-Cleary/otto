@@ -107,9 +107,8 @@ export function OnboardingTab() {
         <div>
           <h1>wake otto up</h1>
           <p className="onboarding-lede">
-            three integrations. otto reads from the widget and meeting notes,
-            queues borderline cases in slack, and never auto-merges. set up
-            in any order — items only flow once a step is connected.
+            three required steps to ship a draft pr: a cursor key, the
+            github app, and one meeting source. the rest is optional.
           </p>
         </div>
       </header>
@@ -181,10 +180,8 @@ export function OnboardingTab() {
         verify={granolaVerifyLine(granolaStatus)}
       >
         <p>
-          granola has no webhook system. otto pulls new meeting notes off
-          their rest api on a 3-minute cron. paste a personal api key
-          below — otto validates it live and starts ingesting within
-          seconds.
+          paste a granola personal api key. otto polls every 3 minutes
+          and validates the key live before saving.
         </p>
         <GranolaKeyForm
           configured={!!granolaStatus?.apiKeyConfigured}
@@ -226,10 +223,8 @@ export function OnboardingTab() {
         verify="at least one repo is enabled"
       >
         <p>
-          otto routes drafts to whatever repos you&rsquo;ve enabled. add the
-          ones you want it to touch in the <strong>repos</strong> tab — paste
-          a github full name and a short description. otto re-embeds the
-          description so its router can find it later.
+          add a repo in the <strong>repos</strong> tab: github full name +
+          one-sentence description. otto embeds the description for routing.
         </p>
         <Hint>
           start with two or three repos otto knows well. expand only after
@@ -256,9 +251,8 @@ export function OnboardingTab() {
         }
       >
         <p>
-          otto fires diffs through the cursor agent. paste your team&rsquo;s
-          cursor api key — otto stores it in this deployment&rsquo;s database
-          and uses it only when opening draft prs from items routed to your
+          otto drafts diffs through cursor. paste a per-team cursor api key
+          — otto only uses it when opening prs for items routed to your
           repos.
         </p>
         <CursorKeyForm
@@ -291,10 +285,8 @@ export function OnboardingTab() {
         }
       >
         <p>
-          otto opens draft pull requests through a per-team github app
-          installation. click below to install on the github account or
-          organization that owns the repos you want otto to touch — you
-          can pick repos during install.
+          install the github app on the account or org that owns your
+          repos. you pick which repos during install.
         </p>
         <GithubInstall status={githubStatus} teamId={teamId} />
         <Hint>
@@ -312,9 +304,9 @@ export function OnboardingTab() {
         verify="otto has queued at least one item"
       >
         <p>
-          low-confidence items go to a slack review channel instead of firing
-          automatically. set the env vars below in convex, then point the
-          slack app&rsquo;s interactivity url at otto.
+          low-confidence items route to slack for human approval. set
+          these env vars and point the slack app at otto&rsquo;s
+          interactivity url.
         </p>
         <CodeBlock
           language="bash"

@@ -449,7 +449,7 @@
 
       /* Hero */
       .hero { padding: 28px 20px 48px; gap: 24px; }
-      h1 { font-size: 44px; line-height: 1; }
+      h1 { font-size: 36px; line-height: 1; word-break: keep-all; }
       .lede { font-size: 14px; line-height: 1.55; }
       .cta { flex-wrap: wrap; gap: 8px; margin-top: 20px; }
       .btn { font-size: 10px; padding: 11px 14px; }
@@ -540,12 +540,7 @@
   <!-- ── How it works ───────────────────────────────────────── -->
   <section id="how">
     <p class="eyebrow">how it works <span class="sep">//</span> three steps</p>
-    <h2>standup &rarr; pr</h2>
-    <p class="section-lede">
-      otto runs in the background. it pulls each new transcript and feedback
-      item off the queue, figures out what changed, and writes a draft pr a
-      human can land in minutes — not days.
-    </p>
+    <h2>meeting &rarr; pr</h2>
 
     <div class="steps">
       <div class="step">
@@ -557,8 +552,7 @@
         <h3>otto listens</h3>
         <p>
           connect granola or zoom once. otto pulls every new meeting
-          transcript on its own — never joins the call. the widget
-          covers anything you'd file from a dashboard between meetings.
+          transcript on its own — never joins the call.
         </p>
       </div>
 
@@ -598,9 +592,8 @@
       <p class="eyebrow">surfaces <span class="sep">//</span> where otto shows up</p>
       <h2>four places.<br/>one otter.</h2>
       <p class="section-lede">
-        otto&rsquo;s native surface uses paper + amber. inside third-party
-        platforms — github, slack, your ide — only the small avatar
-        carries the brand. host design wins everywhere else.
+        host design wins everywhere except otto&rsquo;s own dashboard.
+        elsewhere, only the small avatar marks otto&rsquo;s output.
       </p>
 
       <div class="surfaces">
@@ -645,8 +638,7 @@
     <p class="eyebrow">voice <span class="sep">//</span> first-person, brief</p>
     <h2>how otto talks</h2>
     <p class="section-lede">
-      otto writes its own pr descriptions. confident, brief, first-person.
-      never peppy, never apologetic, never emoji-heavy.
+      otto writes its own pr descriptions. brief, first-person, never peppy.
     </p>
 
     <div class="quote">
@@ -667,10 +659,7 @@
   <section>
     <p class="eyebrow">live <span class="sep">//</span> the queue right now</p>
     <h2>today&rsquo;s daybook</h2>
-    <p class="section-lede">
-      a snapshot of what otto&rsquo;s holding. the pixel pouch in the otter&rsquo;s
-      paws shows the same status as the row.
-    </p>
+    <p class="section-lede">a snapshot of what otto&rsquo;s holding.</p>
 
     <div class="board">
       <div class="head">
@@ -712,9 +701,8 @@
     <p class="eyebrow">get started <span class="sep">//</span> early access</p>
     <h2>wake otto up.</h2>
     <p class="lede">
-      connect granola or zoom, drop the widget on a dashboard, and otto
-      starts drafting. v0.4 is read-only-by-default — every diff waits for
-      a human.
+      connect granola or zoom and otto starts drafting. read-only by default
+      — every diff waits for a human.
     </p>
     <div class="cta" style="justify-content:center;">
       <a href="/login" class="btn btn-primary">open dashboard</a>
