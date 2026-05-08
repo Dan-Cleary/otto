@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../convexApi";
 import { useTeam } from "../teamContext";
@@ -13,15 +13,6 @@ type ProjectRow = Doc<"projects"> & {
 };
 
 type Item = Doc<"items">;
-
-const BLANK_DRAFT = {
-  name: "",
-  slug: "",
-  description: "",
-  urlPatterns: "",
-  primaryRepoId: "",
-  enabled: true,
-};
 
 // Tab-internal "view" — grid (everyone) or detail (one project zoomed in).
 // We keep this as component state rather than wiring real URL routing;
@@ -123,17 +114,15 @@ function ProjectsGrid({
         style={{ justifyContent: "space-between", alignItems: "baseline" }}
       >
         <h2 style={{ margin: 0 }}>projects</h2>
-        {!creating && (
-          <button className="primary" onClick={() => setCreating(true)}>
-            + new project
-          </button>
-        )}
+        <button className="primary" onClick={() => setCreating(true)}>
+          + new project
+        </button>
       </div>
 
       {creating && (
-        <ProjectForm
-          onCancel={() => setCreating(false)}
-          onSaved={(id) => {
+        <CreateProjectModal
+          onClose={() => setCreating(false)}
+          onCreated={(id) => {
             setCreating(false);
             onOpen(id);
           }}
@@ -143,18 +132,12 @@ function ProjectsGrid({
       {!projects ? (
         <p className="muted">loading…</p>
       ) : projects.length === 0 ? (
-        !creating && (
-          <div className="empty">
-            <OttoHero size={120} caption="no projects yet" />
-            <p style={{ marginTop: 12 }}>
-              create a project to start collecting widget feedback.
-            </p>
-            <p className="muted" style={{ fontSize: 12 }}>
-              each project owns url patterns + a primary repo so otto can
-              route feedback without asking.
-            </p>
-          </div>
-        )
+        <div className="empty">
+          <OttoHero size={120} caption="no projects yet" />
+          <p style={{ marginTop: 12 }}>
+            create a project to start collecting widget feedback.
+          </p>
+        </div>
       ) : (
         <div className="project-grid">
           {projects.map((p) => (
@@ -299,7 +282,7 @@ function ProjectDetail({
       </div>
 
       {editing && (
-        <ProjectForm
+        <ProjectEditForm
           existing={project}
           onCancel={() => setEditing(false)}
           onSaved={() => setEditing(false)}
@@ -406,18 +389,123 @@ function ProjectDetail({
   );
 }
 
-/* ─────────────────────── shared form ─────────────────────── */
+/* ─────────────────────── create modal ─────────────────────── */
 
-function ProjectForm({
+// Minimal create flow: just the project name. URL patterns, description,
+// primary repo, and enabled-toggle are all configurable inside the
+// project once it exists. Slug auto-derives from name.
+function CreateProjectModal({
+  onClose,
+  onCreated,
+}: {
+  onClose: () => void;
+  onCreated: (id: Id<"projects">) => void;
+}) {
+  const { teamId } = useTeam();
+  const upsert = useMutation(api.projects.upsert);
+  const [name, setName] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
+  // Esc to close.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  const onCreate = async () => {
+    if (!teamId || !name.trim()) return;
+    setBusy(true);
+    setErr(null);
+    try {
+      const id = await upsert({
+        teamId,
+        name: name.trim(),
+        slug: name.trim().toLowerCase().replace(/[^a-z0-9-]+/g, "-"),
+        description: "",
+        urlPatterns: [],
+        primaryRepoId: null,
+        enabled: true,
+      });
+      onCreated(id as Id<"projects">);
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "failed to create");
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div
+      className="modal-backdrop"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+    >
+      <div
+        className="modal-panel"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h3 style={{ marginTop: 0 }}>new project</h3>
+        <p className="muted" style={{ fontSize: 12, marginTop: 0 }}>
+          give it a name. you can wire up a repo and url patterns once
+          it's created.
+        </p>
+        <label className="otto-eyebrow">name</label>
+        <input
+          autoFocus
+          placeholder="orders"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && name.trim() && !busy) onCreate();
+          }}
+          style={{ width: "100%" }}
+        />
+        {err && (
+          <p
+            className="muted"
+            style={{ color: "var(--otto-red, #a04a2c)", fontSize: 12 }}
+          >
+            {err}
+          </p>
+        )}
+        <div
+          className="row"
+          style={{ justifyContent: "flex-end", gap: 8, marginTop: 16 }}
+        >
+          <button onClick={onClose} disabled={busy}>
+            cancel
+          </button>
+          <button
+            className="primary"
+            disabled={!name.trim() || busy}
+            onClick={onCreate}
+          >
+            {busy ? "creating…" : "create"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─────────────────────── edit form ─────────────────────── */
+
+// The full project form, shown inline inside ProjectDetail. Lets you
+// rename, edit url patterns, swap primary repo, toggle enabled, delete.
+function ProjectEditForm({
   existing,
   onCancel,
   onSaved,
   onDeleted,
 }: {
-  existing?: ProjectRow;
+  existing: ProjectRow;
   onCancel: () => void;
-  onSaved: (id: Id<"projects">) => void;
-  onDeleted?: () => void;
+  onSaved: () => void;
+  onDeleted: () => void;
 }) {
   const { teamId } = useTeam();
   const repos = useQuery(
@@ -427,18 +515,14 @@ function ProjectForm({
   const upsert = useMutation(api.projects.upsert);
   const remove = useMutation(api.projects.remove);
 
-  const [draft, setDraft] = useState(
-    existing
-      ? {
-          name: existing.name,
-          slug: existing.slug,
-          description: existing.description,
-          urlPatterns: existing.urlPatterns.join("\n"),
-          primaryRepoId: existing.primaryRepoId ?? "",
-          enabled: existing.enabled,
-        }
-      : BLANK_DRAFT,
-  );
+  const [draft, setDraft] = useState({
+    name: existing.name,
+    slug: existing.slug,
+    description: existing.description,
+    urlPatterns: existing.urlPatterns.join("\n"),
+    primaryRepoId: existing.primaryRepoId ?? "",
+    enabled: existing.enabled,
+  });
 
   const onSave = async () => {
     if (!teamId) return;
@@ -446,9 +530,9 @@ function ProjectForm({
       .split("\n")
       .map((p) => p.trim())
       .filter(Boolean);
-    const id = await upsert({
+    await upsert({
       teamId,
-      id: existing?._id,
+      id: existing._id,
       name: draft.name,
       slug:
         draft.slug ||
@@ -460,21 +544,19 @@ function ProjectForm({
         : null,
       enabled: draft.enabled,
     });
-    onSaved((existing?._id ?? id) as Id<"projects">);
+    onSaved();
   };
 
   const onDelete = async () => {
-    if (!teamId || !existing) return;
+    if (!teamId) return;
     if (!confirm(`delete project "${existing.name}"?`)) return;
     await remove({ teamId, id: existing._id });
-    onDeleted?.();
+    onDeleted();
   };
 
   return (
     <div className="card">
-      <h3 style={{ marginTop: 0 }}>
-        {existing ? "edit project" : "new project"}
-      </h3>
+      <h3 style={{ marginTop: 0 }}>edit project</h3>
       <div
         style={{
           display: "grid",
@@ -485,7 +567,6 @@ function ProjectForm({
         <div>
           <label className="otto-eyebrow">name</label>
           <input
-            placeholder="orders"
             value={draft.name}
             onChange={(e) => setDraft({ ...draft, name: e.target.value })}
             style={{ width: "100%" }}
@@ -494,28 +575,12 @@ function ProjectForm({
         <div>
           <label className="otto-eyebrow">slug</label>
           <input
-            placeholder="orders"
             value={draft.slug}
             onChange={(e) => setDraft({ ...draft, slug: e.target.value })}
             style={{ width: "100%" }}
           />
         </div>
       </div>
-      <label
-        className="otto-eyebrow"
-        style={{ marginTop: 12, display: "block" }}
-      >
-        description
-      </label>
-      <textarea
-        rows={2}
-        placeholder="checkout, payments, refund flow on the orders dashboard"
-        value={draft.description}
-        onChange={(e) =>
-          setDraft({ ...draft, description: e.target.value })
-        }
-        style={{ width: "100%" }}
-      />
       <label
         className="otto-eyebrow"
         style={{ marginTop: 12, display: "block" }}
@@ -580,13 +645,9 @@ function ProjectForm({
         className="row"
         style={{ justifyContent: "space-between", marginTop: 16 }}
       >
-        {existing ? (
-          <button className="danger" onClick={onDelete}>
-            delete
-          </button>
-        ) : (
-          <span />
-        )}
+        <button className="danger" onClick={onDelete}>
+          delete
+        </button>
         <div className="row" style={{ gap: 8 }}>
           <button onClick={onCancel}>cancel</button>
           <button
@@ -594,7 +655,7 @@ function ProjectForm({
             disabled={!draft.name.trim()}
             onClick={onSave}
           >
-            {existing ? "save" : "create"}
+            save
           </button>
         </div>
       </div>

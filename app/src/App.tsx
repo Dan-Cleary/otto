@@ -73,6 +73,7 @@ function Inner() {
         </div>
         <SignOutButton />
       </header>
+      <SetupBanner status={setup} onResume={() => setTab("settings")} />
       <div className="tabs">
         {TABS.map((t) => (
           <button
@@ -84,7 +85,6 @@ function Inner() {
           </button>
         ))}
       </div>
-      <SetupBanner status={setup} onResume={() => setTab("settings")} />
       {!teamId ? (
         <p className="muted" style={{ marginTop: 24 }}>
           {bootstrapping || teams === undefined

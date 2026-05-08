@@ -580,3 +580,23 @@ a:hover { color: var(--otto-ink); text-decoration-color: var(--otto-ink); }
   outline: 2px solid var(--otto-amber, #c89045);
   outline-offset: 2px;
 }
+
+/* Modal — used by CreateProjectModal in the projects tab. */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(28, 26, 22, 0.55);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--otto-space-4);
+}
+.modal-panel {
+  background: var(--otto-cream);
+  border: var(--otto-border-hair);
+  padding: var(--otto-space-5) var(--otto-space-6);
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 6px 6px 0 rgba(28, 26, 22, 0.15);
+}
