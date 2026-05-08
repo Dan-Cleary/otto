@@ -551,3 +551,52 @@ a:hover { color: var(--otto-ink); text-decoration-color: var(--otto-ink); }
   font-style: italic;
   font-weight: 400;
 }
+
+/* Project grid — clickable cards in the merged Projects tab. */
+.project-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--otto-space-3);
+  margin-top: var(--otto-space-3);
+  margin-bottom: var(--otto-space-6);
+}
+.project-card {
+  appearance: none;
+  text-align: left;
+  width: 100%;
+  background: var(--otto-cream);
+  border: var(--otto-border-hair);
+  padding: var(--otto-space-4) var(--otto-space-5);
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  transition: background 0.1s ease, border-color 0.1s ease;
+}
+.project-card:hover {
+  background: var(--otto-bg);
+  border-color: var(--otto-ink);
+}
+.project-card:focus-visible {
+  outline: 2px solid var(--otto-amber, #c89045);
+  outline-offset: 2px;
+}
+
+/* Modal — used by CreateProjectModal in the projects tab. */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(28, 26, 22, 0.55);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--otto-space-4);
+}
+.modal-panel {
+  background: var(--otto-cream);
+  border: var(--otto-border-hair);
+  padding: var(--otto-space-5) var(--otto-space-6);
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 6px 6px 0 rgba(28, 26, 22, 0.15);
+}

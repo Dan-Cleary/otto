@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { AuditTab } from "./tabs/AuditTab";
 import { ProjectsTab } from "./tabs/ProjectsTab";
 import { ReposTab } from "./tabs/ReposTab";
 import { SettingsTab } from "./tabs/SettingsTab";
@@ -9,7 +8,6 @@ import { TeamProvider, useTeam, type TeamId } from "./teamContext";
 import { useSetupStatus, SetupBanner } from "./SetupStatus";
 
 const TABS = [
-  { id: "audit", label: "Activity", Comp: AuditTab },
   { id: "projects", label: "Projects", Comp: ProjectsTab },
   { id: "repos", label: "Repos", Comp: ReposTab },
   { id: "settings", label: "Settings", Comp: SettingsTab },
@@ -32,13 +30,13 @@ function Inner() {
   const setup = useSetupStatus(teamId);
 
   // First-signin default: a fresh user with no required setup done
-  // lands on settings (wizard) instead of an empty Activity tab. The
-  // choice is sticky once they navigate (recorded in localStorage),
-  // so we don't keep forcing settings on every page load.
+  // lands on settings (wizard). The choice is sticky once they navigate
+  // (recorded in localStorage), so we don't keep forcing settings on
+  // every page load.
   const [tab, setTab] = useState<(typeof TABS)[number]["id"]>(() => {
-    if (typeof window === "undefined") return "audit";
+    if (typeof window === "undefined") return "projects";
     const saved = window.localStorage.getItem("otto.lastTab");
-    return saved && isTabId(saved) ? saved : "audit";
+    return saved && isTabId(saved) ? saved : "projects";
   });
   const Comp = TABS.find((t) => t.id === tab)!.Comp;
 
@@ -50,7 +48,7 @@ function Inner() {
       typeof window !== "undefined"
         ? window.localStorage.getItem("otto.lastTab")
         : null;
-    if (!saved && tab === "audit" && setup.done === 0) setTab("settings");
+    if (!saved && tab === "projects" && setup.done === 0) setTab("settings");
   }, [setup.loading, setup.done, tab]);
 
   // Persist the selected tab so refreshes don't bounce people back
@@ -75,6 +73,7 @@ function Inner() {
         </div>
         <SignOutButton />
       </header>
+      <SetupBanner status={setup} onResume={() => setTab("settings")} />
       <div className="tabs">
         {TABS.map((t) => (
           <button
@@ -86,7 +85,6 @@ function Inner() {
           </button>
         ))}
       </div>
-      <SetupBanner status={setup} onResume={() => setTab("settings")} />
       {!teamId ? (
         <p className="muted" style={{ marginTop: 24 }}>
           {bootstrapping || teams === undefined
