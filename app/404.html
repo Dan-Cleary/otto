@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>otto — page not found</title>
+  <meta name="robots" content="noindex" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=VT323&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    :root {
+      --bg:        #ece4d3;
+      --cream:     #f6efde;
+      --hair:      #b8ad94;
+      --ink:       #1c1a16;
+      --pencil:    #6b6356;
+      --amber:     #c89045;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+      -webkit-font-smoothing: antialiased;
+    }
+    main {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 24px;
+      text-align: center;
+      gap: 16px;
+    }
+    .num {
+      font-family: "VT323", ui-monospace, monospace;
+      font-size: 144px;
+      line-height: 1;
+      color: var(--amber);
+      letter-spacing: -0.02em;
+      margin: 0;
+    }
+    .otter {
+      width: 96px;
+      height: 96px;
+      image-rendering: pixelated;
+      margin-bottom: 8px;
+    }
+    h1 {
+      font-family: "VT323", ui-monospace, monospace;
+      font-weight: 400;
+      font-size: 32px;
+      letter-spacing: -0.01em;
+      margin: 0;
+    }
+    p {
+      max-width: 420px;
+      color: var(--pencil);
+      font-size: 13px;
+      line-height: 1.55;
+      margin: 0;
+    }
+    .links {
+      display: flex;
+      gap: 16px;
+      margin-top: 12px;
+      font-size: 12px;
+      letter-spacing: 0.04em;
+    }
+    .links a {
+      color: var(--ink);
+      text-decoration: none;
+      padding: 8px 14px;
+      border: 1px solid var(--ink);
+      background: var(--cream);
+      transition: background 0.1s ease;
+    }
+    .links a:hover { background: var(--bg); }
+    .links a.primary { background: var(--ink); color: var(--cream); }
+    .links a.primary:hover { background: var(--amber); }
+    .crumb {
+      font-size: 10px;
+      color: var(--pencil);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin: 24px 0 0;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <img class="otter" src="/otto/sprites/otter-error.svg" alt="" />
+    <p class="num">404</p>
+    <h1>otto can&rsquo;t find that page</h1>
+    <p>the path you tried doesn&rsquo;t map to anything otto knows about. it might have moved, or never existed.</p>
+    <div class="links">
+      <a href="/" class="primary">back to home</a>
+      <a href="/dashboard/">open dashboard</a>
+    </div>
+    <p class="crumb">otto · 404</p>
+  </main>
+</body>
+</html>
