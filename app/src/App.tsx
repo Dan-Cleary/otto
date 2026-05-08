@@ -1,15 +1,11 @@
 import { useEffect, useState } from "react";
 import { ProjectsTab } from "./tabs/ProjectsTab";
-import { ReposTab } from "./tabs/ReposTab";
 import { SettingsTab } from "./tabs/SettingsTab";
 import { OttoWordmark } from "./Otto";
-import { SignOutButton } from "./auth";
 import { TeamProvider, useTeam, type TeamId } from "./teamContext";
-import { useSetupStatus, SetupBanner } from "./SetupStatus";
 
 const TABS = [
   { id: "projects", label: "Projects", Comp: ProjectsTab },
-  { id: "repos", label: "Repos", Comp: ReposTab },
   { id: "settings", label: "Settings", Comp: SettingsTab },
 ] as const;
 
@@ -27,12 +23,7 @@ export function App() {
 
 function Inner() {
   const { teamId, teams, switchTeam, bootstrapping } = useTeam();
-  const setup = useSetupStatus(teamId);
 
-  // First-signin default: a fresh user with no required setup done
-  // lands on settings (wizard). The choice is sticky once they navigate
-  // (recorded in localStorage), so we don't keep forcing settings on
-  // every page load.
   const [tab, setTab] = useState<(typeof TABS)[number]["id"]>(() => {
     if (typeof window === "undefined") return "projects";
     const saved = window.localStorage.getItem("otto.lastTab");
@@ -40,25 +31,11 @@ function Inner() {
   });
   const Comp = TABS.find((t) => t.id === tab)!.Comp;
 
-  // Once setup status loads, if the user is fresh (nothing done) and
-  // has not picked a tab yet this session, route them to settings.
   useEffect(() => {
-    if (setup.loading) return;
-    const saved =
-      typeof window !== "undefined"
-        ? window.localStorage.getItem("otto.lastTab")
-        : null;
-    if (!saved && tab === "projects" && setup.done === 0) setTab("settings");
-  }, [setup.loading, setup.done, tab]);
-
-  // Persist the selected tab so refreshes don't bounce people back
-  // to onboarding once they've started exploring.
-  useEffect(() => {
-    if (setup.loading) return;
     if (typeof window !== "undefined") {
       window.localStorage.setItem("otto.lastTab", tab);
     }
-  }, [tab, setup.loading]);
+  }, [tab]);
 
   return (
     <div className="shell">
@@ -71,9 +48,7 @@ function Inner() {
             onSwitch={switchTeam}
           />
         </div>
-        <SignOutButton />
       </header>
-      <SetupBanner status={setup} onResume={() => setTab("settings")} />
       <div className="tabs">
         {TABS.map((t) => (
           <button

@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useAction, useMutation, useQuery } from "convex/react";
 import { api } from "../convexApi";
-import { OttoGlyphIcon, OttoSprite, IntegrationGlyph, type IntegrationName } from "../Otto";
+import { IntegrationGlyph, type IntegrationName } from "../Otto";
 import { useTeam, type TeamId } from "../teamContext";
 
 type StepStatus = "ready" | "needed" | "checking";
@@ -42,194 +42,66 @@ export function OnboardingTab() {
 
   return (
     <div className="onboarding">
-      <header className="onboarding-hero">
-        <OttoSprite
-          size={72}
-          state={
-            allReady(cursorStepStatus, githubStepStatus)
-              ? "done"
-              : "thinking"
-          }
-        />
-        <div>
-          <h1>wake otto up</h1>
-          <p className="onboarding-lede">
-            two required steps to ship a draft pr: add a cursor key,
-            install the github app. then create a project to grab the
-            widget snippet.
-          </p>
-        </div>
-      </header>
-
-      <ProgressStrip
-        cursor={cursorStepStatus}
-        github={githubStepStatus}
-      />
-
       <Step
-        n={1}
-        glyph="task"
-        title="add cursor api key"
+        title="cursor api key"
         platform="cursor"
         status={cursorStepStatus}
         verify={
           cursorStatus?.configured
             ? `key on file (${cursorStatus.keyHint ?? "•••"})`
-            : "no cursor key on this team"
+            : "not connected"
         }
-        required="required"
       >
-        <p>
-          otto drafts diffs through cursor. paste a per-team cursor api key
-          — otto only uses it when opening prs for items routed to your
-          repos.
-        </p>
         <CursorKeyForm
           configured={!!cursorStatus?.configured}
           keyHint={cursorStatus?.keyHint ?? null}
           teamId={teamId}
         />
-        <Hint>
-          generate the key from cursor → settings → api keys. you can clear it
-          at any time below; otto immediately stops firing for this team if no
-          key is set.
-        </Hint>
       </Step>
 
       <Step
-        n={2}
-        glyph="task"
-        title="install github app"
+        title="github app"
         platform="github"
         status={githubStepStatus}
         verify={
           githubStatus?.configured
             ? `installed on ${githubStatus.accountLogin ?? "github"}`
-            : "no github app installation on this team"
+            : "not installed"
         }
-        required="required"
       >
-        <p>
-          install the github app on the account or org that owns your
-          repos. you pick which repos during install.
-        </p>
         <GithubInstall status={githubStatus} teamId={teamId} />
-        <Hint>
-          you can change which repos the app has access to any time from
-          github → settings → applications → otto-agent-app. uninstalling
-          there immediately revokes otto&rsquo;s ability to open prs.
-        </Hint>
       </Step>
-
-      <footer className="onboarding-footer">
-        <span className="otto-eyebrow">
-          next <span className="sep">//</span> install the widget
-        </span>
-        <p className="muted" style={{ margin: 0 }}>
-          once these three are live, head to{" "}
-          <strong>projects</strong>, create a project, and grab the
-          per-project widget snippet to drop on your app.
-        </p>
-      </footer>
     </div>
   );
 }
 
 /* ─────────────────── pieces ─────────────────── */
 
-function ProgressStrip(props: {
-  cursor: StepStatus;
-  github: StepStatus;
-}) {
-  const cells = [
-    { name: "cursor", status: props.cursor },
-    { name: "github", status: props.github },
-  ];
-  const ready = cells.filter((c) => c.status === "ready").length;
-  return (
-    <div className="progress-strip">
-      <div className="progress-count">
-        <span className="progress-num">{ready}</span>
-        <span className="progress-of">/ {cells.length}</span>
-        <span className="otto-eyebrow" style={{ marginLeft: 12 }}>
-          steps live
-        </span>
-      </div>
-      <div className="progress-cells">
-        {cells.map((c) => (
-          <div key={c.name} className={`progress-cell is-${c.status}`}>
-            <span className="cell-name">{c.name}</span>
-            <span className="cell-status">{statusLabel(c.status)}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 function Step({
-  n,
-  glyph,
   platform,
   title,
   status,
   verify,
-  required,
   children,
 }: {
-  n: number;
-  glyph: "inbox" | "notebook" | "task" | "ripple";
   platform?: IntegrationName;
   title: string;
   status: StepStatus;
   verify: string;
-  required?: "required" | "optional";
   children: React.ReactNode;
 }) {
   return (
     <section className={`step is-${status}`}>
       <header className="step-head">
-        <span className="step-num">{String(n).padStart(2, "0")}</span>
-        {platform ? (
-          <IntegrationGlyph name={platform} size={20} />
-        ) : (
-          <OttoGlyphIcon name={glyph} size={20} />
-        )}
+        {platform && <IntegrationGlyph name={platform} size={20} />}
         <h3>{title}</h3>
-        {required && (
-          <span
-            className="otto-eyebrow"
-            style={{
-              fontSize: 10,
-              padding: "2px 6px",
-              border: "1px solid var(--otto-ink, #1c1a16)",
-              background:
-                required === "optional"
-                  ? "transparent"
-                  : "var(--otto-amber-soft, #f0d9a8)",
-              color: "var(--otto-ink, #1c1a16)",
-            }}
-          >
-            {required === "required" ? "required" : "optional"}
-          </span>
-        )}
         <span className={`step-pill is-${status}`}>{statusLabel(status)}</span>
       </header>
       <div className="step-body">{children}</div>
       <footer className="step-verify">
-        <span className="otto-eyebrow">verify</span>
         <span>{verify}</span>
       </footer>
     </section>
-  );
-}
-
-function Hint({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="hint">
-      <OttoGlyphIcon name="pawprint" size={14} />
-      <span>{children}</span>
-    </div>
   );
 }
 
@@ -242,10 +114,6 @@ function statusLabel(s: StepStatus): string {
     case "checking":
       return "checking…";
   }
-}
-
-function allReady(cursor: StepStatus, github: StepStatus): boolean {
-  return cursor === "ready" && github === "ready";
 }
 
 function CursorKeyForm({

@@ -245,13 +245,20 @@ function ProjectDetail({
   const [editing, setEditing] = useState(false);
   const projectItems =
     items?.filter((it) => it.projectId === project._id) ?? [];
-  const projectStats = items ? computeStats(projectItems) : null;
   const noEventsYet = items && projectItems.length === 0;
 
   const rotateSecret = useMutation(api.projects.rotateWidgetSecret);
+  const cursorStatus = useQuery(
+    api.cursorDb.status,
+    teamId ? { teamId } : "skip",
+  ) as { configured: boolean } | undefined;
+  const githubStatus = useQuery(
+    api.githubDb.status,
+    teamId ? { teamId } : "skip",
+  ) as { configured: boolean } | undefined;
+
   // Per-project widget snippet: the project's own secret tells the
-  // server which project (and team) the event belongs to. No team
-  // secret, no URL patterns.
+  // server which project (and team) the event belongs to.
   const convexUrl = (import.meta.env.VITE_CONVEX_URL as string | undefined) ?? "";
   const siteUrl = convexUrl.replace(".convex.cloud", ".convex.site");
   const widgetSecret = project.widgetSecret;
@@ -261,6 +268,18 @@ function ProjectDetail({
   data-secret="${widgetSecret ?? "<rotate to generate a secret>"}"
   defer
 ></script>`;
+
+  // Checklist of what's still needed before this project can ship a
+  // draft pr from a widget event. Drives the empty-state "next step"
+  // card. Order is the order we want users to tackle them.
+  const missingRepo = !project.primaryRepoId;
+  const missingCursor = cursorStatus !== undefined && !cursorStatus.configured;
+  const missingGithub = githubStatus !== undefined && !githubStatus.configured;
+  const teamSetupReady =
+    cursorStatus !== undefined &&
+    githubStatus !== undefined &&
+    cursorStatus.configured &&
+    githubStatus.configured;
 
   return (
     <>
@@ -304,71 +323,26 @@ function ProjectDetail({
         />
       )}
 
-      {projectStats && (
-        <div className="stat-grid">
-          <StatCard
-            label={
-              <>
-                ITEMS <span className="sep">//</span> ALL TIME
-              </>
+      {noEventsYet && (
+        <ProjectGettingStarted
+          missingRepo={missingRepo}
+          missingCursor={missingCursor}
+          missingGithub={missingGithub}
+          teamSetupReady={teamSetupReady}
+          snippet={snippet}
+          widgetSecret={widgetSecret}
+          onRotate={() => {
+            if (!teamId) return;
+            if (
+              confirm(
+                "rotate this project's widget secret? pages still using the old one will stop sending feedback.",
+              )
+            ) {
+              void rotateSecret({ teamId, id: project._id });
             }
-            value={projectStats.total}
-            caption={`${projectStats.last7d} in the last 7 days`}
-          />
-          <StatCard
-            label={
-              <>
-                PRS DRAFTED <span className="sep">//</span> ALL TIME
-              </>
-            }
-            value={projectStats.prsOpened}
-            caption={`${projectStats.prsLast7d} in the last 7 days`}
-            accent
-          />
-          <StatCard
-            label={
-              <>
-                AWAITING <span className="sep">//</span> SLACK QUEUE
-              </>
-            }
-            value={projectStats.queued}
-            caption={
-              projectStats.queued === 0 ? "all clear" : "needs review"
-            }
-          />
-        </div>
-      )}
-
-      {noEventsYet && widgetSecret && (
-        <div className="card">
-          <h3 style={{ marginTop: 0 }}>install the widget</h3>
-          <p className="muted" style={{ fontSize: 12 }}>
-            otto isn't seeing events for this project yet. paste this
-            snippet on the staging or prod build of your app — feedback
-            from anyone using the widget on that page lands here.
-          </p>
-          <SnippetBlock code={snippet} />
-          <div
-            className="row"
-            style={{ gap: 8, marginTop: 10, alignItems: "center" }}
-          >
-            <button
-              type="button"
-              onClick={() =>
-                teamId &&
-                confirm(
-                  "rotate this project's widget secret? pages still using the old one will stop sending feedback.",
-                ) &&
-                void rotateSecret({ teamId, id: project._id })
-              }
-            >
-              rotate secret
-            </button>
-            <span className="muted" style={{ fontSize: 11 }}>
-              rotating invalidates pages still using the old secret
-            </span>
-          </div>
-        </div>
+          }}
+          onEditProject={() => setEditing(true)}
+        />
       )}
 
       <div className="section-label">
@@ -417,6 +391,141 @@ function ProjectDetail({
         </table>
       )}
     </>
+  );
+}
+
+/* ─────────────────────── getting-started ─────────────────────── */
+
+// Empty-state guidance when a project has no events yet. Walks the
+// user through whatever's still missing — connect a repo, set up
+// team integrations, drop the widget snippet — in a single card.
+function ProjectGettingStarted({
+  missingRepo,
+  missingCursor,
+  missingGithub,
+  teamSetupReady,
+  snippet,
+  widgetSecret,
+  onRotate,
+  onEditProject,
+}: {
+  missingRepo: boolean;
+  missingCursor: boolean;
+  missingGithub: boolean;
+  teamSetupReady: boolean;
+  snippet: string;
+  widgetSecret: string | undefined;
+  onRotate: () => void;
+  onEditProject: () => void;
+}) {
+  const items: { label: string; done: boolean; action?: React.ReactNode }[] = [
+    {
+      label: "connect a repo to this project",
+      done: !missingRepo,
+      action: missingRepo && (
+        <button onClick={onEditProject}>set primary repo</button>
+      ),
+    },
+    {
+      label: "add a cursor api key",
+      done: !missingCursor,
+      action: missingCursor && (
+        <a href="#" onClick={(e) => e.preventDefault()} style={{ fontSize: 12 }}>
+          go to settings →
+        </a>
+      ),
+    },
+    {
+      label: "install the github app",
+      done: !missingGithub,
+      action: missingGithub && (
+        <a href="#" onClick={(e) => e.preventDefault()} style={{ fontSize: 12 }}>
+          go to settings →
+        </a>
+      ),
+    },
+  ];
+
+  return (
+    <div className="card" style={{ marginTop: 16 }}>
+      <h3 style={{ marginTop: 0 }}>get this project running</h3>
+      <ul
+        style={{
+          listStyle: "none",
+          padding: 0,
+          margin: "8px 0 16px",
+          display: "flex",
+          flexDirection: "column",
+          gap: 8,
+        }}
+      >
+        {items.map((it) => (
+          <li
+            key={it.label}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              fontSize: 13,
+              opacity: it.done ? 0.5 : 1,
+            }}
+          >
+            <span
+              style={{
+                width: 18,
+                height: 18,
+                border: "1px solid var(--otto-ink, #1c1a16)",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontFamily: "var(--otto-font-mono)",
+                fontSize: 11,
+                background: it.done ? "var(--otto-ink, #1c1a16)" : "transparent",
+                color: it.done ? "var(--otto-cream, #f6efde)" : "inherit",
+              }}
+              aria-hidden
+            >
+              {it.done ? "✓" : ""}
+            </span>
+            <span style={{ textDecoration: it.done ? "line-through" : "none" }}>
+              {it.label}
+            </span>
+            {it.action && <span style={{ marginLeft: "auto" }}>{it.action}</span>}
+          </li>
+        ))}
+      </ul>
+
+      {teamSetupReady ? (
+        <>
+          <h4 style={{ margin: "16px 0 6px", fontSize: 13 }}>
+            drop the widget snippet
+          </h4>
+          <p className="muted" style={{ fontSize: 12, marginTop: 0 }}>
+            paste this on staging or prod. feedback from anyone using
+            the widget lands in this project.
+          </p>
+          <SnippetBlock code={snippet} />
+          {widgetSecret && (
+            <div
+              className="row"
+              style={{ gap: 8, marginTop: 10, alignItems: "center" }}
+            >
+              <button type="button" onClick={onRotate}>
+                rotate secret
+              </button>
+              <span className="muted" style={{ fontSize: 11 }}>
+                rotating invalidates pages still using the old one
+              </span>
+            </div>
+          )}
+        </>
+      ) : (
+        <p className="muted" style={{ fontSize: 12 }}>
+          finish team setup above, then come back to grab the widget
+          snippet.
+        </p>
+      )}
+    </div>
   );
 }
 
