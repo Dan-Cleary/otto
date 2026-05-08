@@ -1,1 +1,0 @@
-{"root":["./src/app.tsx","./src/otto.tsx","./src/setupstatus.tsx","./src/auth.tsx","./src/convexapi.ts","./src/main.tsx","./src/teamcontext.tsx","./src/vite-env.d.ts","./src/tabs/memberstab.tsx","./src/tabs/onboardingtab.tsx","./src/tabs/projectstab.tsx","./src/tabs/repostab.tsx","./src/tabs/settingstab.tsx"],"version":"5.9.3"}

@@ -8,3 +8,6 @@ app/public/otto.js
 .gstack/
 .vercel
 .DS_Store
+
+# TypeScript incremental build cache
+*.tsbuildinfo
