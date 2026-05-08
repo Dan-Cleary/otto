@@ -240,11 +240,29 @@ function ProjectDetail({
   items: Item[] | undefined;
   onBack: () => void;
 }) {
+  const { teamId } = useTeam();
   const [editing, setEditing] = useState(false);
   const projectItems =
     items?.filter((it) => it.projectId === project._id) ?? [];
   const projectStats = items ? computeStats(projectItems) : null;
   const noEventsYet = items && projectItems.length === 0;
+
+  // Per-project widget snippet: includes the team secret + this
+  // project's id so feedback flows here directly without URL-pattern
+  // matching.
+  const widgetSecret = useQuery(
+    api.teams.widgetSecret,
+    teamId ? { teamId } : "skip",
+  ) as string | null | undefined;
+  const convexUrl = (import.meta.env.VITE_CONVEX_URL as string | undefined) ?? "";
+  const siteUrl = convexUrl.replace(".convex.cloud", ".convex.site");
+  const snippet = `<script
+  src="https://YOUR-STATIC-HOST/otto.js"
+  data-endpoint="${siteUrl || "https://YOUR-CONVEX.convex.site"}/ingest/widget"
+  data-secret="${widgetSecret ?? "<create the team widget secret in settings>"}"
+  data-project="${project._id}"
+  defer
+></script>`;
 
   return (
     <>
@@ -329,14 +347,19 @@ function ProjectDetail({
         <div className="card">
           <h3 style={{ marginTop: 0 }}>install the widget</h3>
           <p className="muted" style={{ fontSize: 12 }}>
-            otto isn't seeing events for this project yet. drop the snippet
-            below into your app and otto will route feedback here whenever
-            the page url matches one of your patterns.
+            otto isn't seeing events for this project yet. paste this
+            snippet on the staging or prod build of your app — feedback
+            from anyone using the widget on that page lands here.
           </p>
-          <p style={{ fontSize: 12 }}>
-            grab the snippet (with your team secret baked in) from{" "}
-            <strong>settings → drop the widget</strong>.
-          </p>
+          {widgetSecret ? (
+            <SnippetBlock code={snippet} />
+          ) : (
+            <p style={{ fontSize: 12 }}>
+              create the team widget secret in{" "}
+              <strong>settings → drop the widget</strong> first, then
+              come back to grab the snippet.
+            </p>
+          )}
         </div>
       )}
 
@@ -706,4 +729,46 @@ function shortSource(ref: string): string {
   } catch {
     return ref;
   }
+}
+
+function SnippetBlock({ code }: { code: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <div style={{ position: "relative" }}>
+      <pre
+        style={{
+          fontFamily: "var(--otto-font-mono)",
+          fontSize: 11,
+          background: "var(--otto-bg)",
+          border: "1px solid var(--otto-rule, rgba(28,26,22,0.18))",
+          padding: 12,
+          margin: "8px 0 0",
+          overflowX: "auto",
+        }}
+      >
+        {code}
+      </pre>
+      <button
+        type="button"
+        onClick={async () => {
+          try {
+            await navigator.clipboard.writeText(code);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 1400);
+          } catch {
+            /* clipboard blocked */
+          }
+        }}
+        style={{
+          position: "absolute",
+          top: 4,
+          right: 4,
+          fontSize: 11,
+          padding: "2px 8px",
+        }}
+      >
+        {copied ? "copied" : "copy"}
+      </button>
+    </div>
+  );
 }
