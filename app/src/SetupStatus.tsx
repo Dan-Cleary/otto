@@ -2,21 +2,21 @@ import { useQuery } from "convex/react";
 import { api } from "./convexApi";
 import type { TeamId } from "./teamContext";
 
-export type RequiredStepKey = "cursor" | "github" | "meetingSource";
+export type RequiredStepKey = "cursor" | "github" | "widget";
 
 export type SetupSnapshot = {
   loading: boolean;
   // Each key is true once that prerequisite is satisfied.
   cursor: boolean;
   github: boolean;
-  meetingSource: boolean;
+  widget: boolean;
   done: number; // 0..3
   total: number; // always 3 today
   ready: boolean; // done === total
 };
 
-// Reads the current team's cursor/github/zoom/granola integration
-// status and reduces it to the three required onboarding gates. The
+// Reads the current team's widget/cursor/github integration status
+// and reduces it to the three required onboarding gates. The
 // dashboard, the wizard, and the persistent banner all read this.
 export function useSetupStatus(teamId: TeamId | null): SetupSnapshot {
   const cursor = useQuery(
@@ -27,34 +27,28 @@ export function useSetupStatus(teamId: TeamId | null): SetupSnapshot {
     api.githubDb.status,
     teamId ? { teamId } : "skip",
   ) as { configured: boolean } | undefined;
-  const zoom = useQuery(
-    api.zoomDb.status,
+  const widget = useQuery(
+    api.teams.widgetStatus,
     teamId ? { teamId } : "skip",
   ) as { configured: boolean } | undefined;
-  const granola = useQuery(
-    api.granolaDb.status,
-    teamId ? { teamId } : "skip",
-  ) as { apiKeyConfigured: boolean } | undefined;
 
   const loading =
     !teamId ||
     cursor === undefined ||
     github === undefined ||
-    zoom === undefined ||
-    granola === undefined;
+    widget === undefined;
 
   const cursorOk = !!cursor?.configured;
   const githubOk = !!github?.configured;
-  const meetingSourceOk = !!zoom?.configured || !!granola?.apiKeyConfigured;
+  const widgetOk = !!widget?.configured;
 
-  const done =
-    Number(cursorOk) + Number(githubOk) + Number(meetingSourceOk);
+  const done = Number(cursorOk) + Number(githubOk) + Number(widgetOk);
 
   return {
     loading,
     cursor: cursorOk,
     github: githubOk,
-    meetingSource: meetingSourceOk,
+    widget: widgetOk,
     done,
     total: 3,
     ready: done === 3,
@@ -71,9 +65,9 @@ export function SetupBanner({
   if (status.loading || status.ready) return null;
   const remaining = status.total - status.done;
   const missing: string[] = [];
+  if (!status.widget) missing.push("widget");
   if (!status.cursor) missing.push("cursor key");
   if (!status.github) missing.push("github app");
-  if (!status.meetingSource) missing.push("a meeting source");
 
   return (
     <div

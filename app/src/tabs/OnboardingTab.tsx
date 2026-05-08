@@ -18,38 +18,6 @@ export function OnboardingTab() {
     api.reposDb.list,
     teamId ? { teamId } : "skip",
   ) as { _id: string; enabled: boolean }[] | undefined;
-  const zoomStatus = useQuery(
-    api.zoomDb.status,
-    teamId ? { teamId } : "skip",
-  ) as
-    | {
-        configured: boolean;
-        enabled: boolean;
-        authType: "oauth" | "s2s" | null;
-        accountId: string | null;
-        accountEmail: string | null;
-        accountName: string | null;
-        last:
-          | { ok: boolean; ingested: number; error: string | null; at: number }
-          | null;
-        itemsToday: number;
-      }
-    | undefined;
-  const granolaStatus = useQuery(
-    api.granolaDb.status,
-    teamId ? { teamId } : "skip",
-  ) as
-    | {
-        last: {
-          ok: boolean;
-          ingested: number;
-          error: string | null;
-          at: number;
-        } | null;
-        itemsToday: number;
-        apiKeyConfigured: boolean;
-      }
-    | undefined;
   const cursorStatus = useQuery(
     api.cursorDb.status,
     teamId ? { teamId } : "skip",
@@ -73,7 +41,6 @@ export function OnboardingTab() {
     if (!items) return null;
     return {
       widget: items.some((i) => i.sourceType === "widget"),
-      granola: items.some((i) => i.sourceType === "granola"),
       slack: items.some(
         (i) =>
           i.status === "queued" ||
@@ -89,20 +56,11 @@ export function OnboardingTab() {
     : repos === undefined
       ? "checking"
       : "needed";
-  const granolaStepStatus: StepStatus =
-    flags?.granola
-      ? "ready"
-      : granolaStatus === undefined
-        ? "checking"
-        : granolaStatus.apiKeyConfigured
-          ? "ready"
-          : "needed";
-  const zoomStepStatus: StepStatus =
-    zoomStatus === undefined
+  const widgetStepStatus: StepStatus = flags?.widget
+    ? "ready"
+    : items === undefined
       ? "checking"
-      : zoomStatus.configured
-        ? "ready"
-        : "needed";
+      : "needed";
   const cursorStepStatus: StepStatus =
     cursorStatus === undefined
       ? "checking"
@@ -115,13 +73,6 @@ export function OnboardingTab() {
       : githubStatus.configured
         ? "ready"
         : "needed";
-  const meetingSourceStepStatus: StepStatus =
-    granolaStepStatus === "ready" || zoomStepStatus === "ready"
-      ? "ready"
-      : granolaStepStatus === "checking" || zoomStepStatus === "checking"
-        ? "checking"
-        : "needed";
-
   const widgetSecret = useQuery(
     api.teams.widgetSecret,
     teamId ? { teamId } : "skip",
@@ -144,9 +95,9 @@ export function OnboardingTab() {
           size={72}
           state={
             allReady(
+              widgetStepStatus,
               cursorStepStatus,
               githubStepStatus,
-              meetingSourceStepStatus,
               reposStepStatus,
             )
               ? "done"
@@ -156,17 +107,16 @@ export function OnboardingTab() {
         <div>
           <h1>wake otto up</h1>
           <p className="onboarding-lede">
-            three required steps to ship a draft pr: drop the widget in
-            your app, add a cursor key, install the github app. meeting
-            sources are optional add-ons.
+            three required steps to ship a draft pr: drop the widget on
+            your app, add a cursor key, install the github app.
           </p>
         </div>
       </header>
 
       <ProgressStrip
+        widget={widgetStepStatus}
         cursor={cursorStepStatus}
         github={githubStepStatus}
-        meetingSource={meetingSourceStepStatus}
         repos={reposStepStatus}
       />
 
@@ -176,7 +126,7 @@ export function OnboardingTab() {
         title="drop the widget"
         status={flags?.widget ? "ready" : "needed"}
         verify="otto sees a widget event"
-        required="optional"
+        required="required"
       >
         <p>
           otto&rsquo;s primary input. build the bundle with{" "}
@@ -212,67 +162,6 @@ export function OnboardingTab() {
 
       <Step
         n={2}
-        glyph="notebook"
-        title="connect granola"
-        platform="granola"
-        status={granolaStepStatus}
-        verify={granolaVerifyLine(granolaStatus)}
-        required="one-of-required"
-      >
-        <p>
-          optional additional source. paste a granola personal api key
-          and otto will poll every 3 minutes for new meeting notes,
-          validating the key live before saving.
-        </p>
-        <GranolaKeyForm
-          configured={!!granolaStatus?.apiKeyConfigured}
-          teamId={teamId}
-        />
-        <Hint>
-          generate the key from granola → settings → api keys (paid
-          plans). otto keeps it in this deployment&rsquo;s database and
-          uses it for the poll cron only. clear it any time below.
-        </Hint>
-      </Step>
-
-      <Step
-        n={3}
-        glyph="ripple"
-        title="connect zoom"
-        platform="zoom"
-        status={zoomStepStatus}
-        verify={zoomVerifyLine(zoomStatus)}
-        required="one-of-required"
-      >
-        <p>
-          optional additional source. otto pulls cloud-recording
-          transcripts from zoom on a 5-minute cron — never joins your
-          meetings. one click to authorize.
-        </p>
-        <ZoomConnect status={zoomStatus} teamId={teamId} />
-      </Step>
-
-      <Step
-        n={4}
-        glyph="task"
-        title="register a repo"
-        status={reposStepStatus}
-        verify="at least one repo is enabled"
-        required="optional"
-      >
-        <p>
-          add a repo in the <strong>repos</strong> tab: github full name +
-          one-sentence description. otto embeds the description for routing.
-        </p>
-        <Hint>
-          start with two or three repos otto knows well. expand only after
-          you&rsquo;ve seen drafts that look right — bad routing is the
-          fastest way to lose trust in the daemon.
-        </Hint>
-      </Step>
-
-      <Step
-        n={5}
         glyph="task"
         title="add cursor api key"
         platform="cursor"
@@ -302,7 +191,7 @@ export function OnboardingTab() {
       </Step>
 
       <Step
-        n={6}
+        n={3}
         glyph="task"
         title="install github app"
         platform="github"
@@ -327,7 +216,26 @@ export function OnboardingTab() {
       </Step>
 
       <Step
-        n={7}
+        n={4}
+        glyph="task"
+        title="register a repo"
+        status={reposStepStatus}
+        verify="at least one repo is enabled"
+        required="optional"
+      >
+        <p>
+          add a repo in the <strong>repos</strong> tab: github full name +
+          one-sentence description. otto embeds the description for routing.
+        </p>
+        <Hint>
+          start with two or three repos otto knows well. expand only after
+          you&rsquo;ve seen drafts that look right — bad routing is the
+          fastest way to lose trust in the daemon.
+        </Hint>
+      </Step>
+
+      <Step
+        n={5}
         glyph="ripple"
         title="connect slack"
         platform="slack"
@@ -376,15 +284,15 @@ export function OnboardingTab() {
 /* ─────────────────── pieces ─────────────────── */
 
 function ProgressStrip(props: {
+  widget: StepStatus;
   cursor: StepStatus;
   github: StepStatus;
-  meetingSource: StepStatus;
   repos: StepStatus;
 }) {
   const cells = [
+    { name: "widget", status: props.widget },
     { name: "cursor", status: props.cursor },
     { name: "github", status: props.github },
-    { name: "meeting source", status: props.meetingSource },
     { name: "repos", status: props.repos },
   ];
   const ready = cells.filter((c) => c.status === "ready").length;
@@ -425,7 +333,7 @@ function Step({
   title: string;
   status: StepStatus;
   verify: string;
-  required?: "required" | "one-of-required" | "optional";
+  required?: "required" | "optional";
   children: React.ReactNode;
 }) {
   return (
@@ -452,11 +360,7 @@ function Step({
               color: "var(--otto-ink, #1c1a16)",
             }}
           >
-            {required === "required"
-              ? "required"
-              : required === "one-of-required"
-                ? "required (pick one)"
-                : "optional"}
+            {required === "required" ? "required" : "optional"}
           </span>
         )}
         <span className={`step-pill is-${status}`}>{statusLabel(status)}</span>
@@ -530,472 +434,16 @@ function statusLabel(s: StepStatus): string {
 }
 
 function allReady(
+  widget: StepStatus,
   cursor: StepStatus,
   github: StepStatus,
-  meetingSource: StepStatus,
   repos: StepStatus,
 ): boolean {
   return (
+    widget === "ready" &&
     cursor === "ready" &&
     github === "ready" &&
-    meetingSource === "ready" &&
     repos === "ready"
-  );
-}
-
-function zoomVerifyLine(
-  status:
-    | {
-        configured: boolean;
-        last:
-          | { ok: boolean; ingested: number; error: string | null; at: number }
-          | null;
-        itemsToday: number;
-      }
-    | undefined,
-): string {
-  if (!status) return "checking…";
-  if (!status.configured) return "no credentials configured";
-  if (!status.last) return "credentials saved · waiting for first poll";
-  const lp = status.last;
-  if (!lp.ok)
-    return `last poll ${relTime(lp.at)} · error: ${lp.error ?? "unknown"}`;
-  return `last poll ${relTime(lp.at)} · ${lp.ingested} new recording${
-    lp.ingested === 1 ? "" : "s"
-  } · ${status.itemsToday} items today`;
-}
-
-function ZoomConnect({
-  status,
-  teamId,
-}: {
-  status:
-    | {
-        configured: boolean;
-        authType: "oauth" | "s2s" | null;
-        accountEmail: string | null;
-        accountName: string | null;
-        accountId: string | null;
-      }
-    | undefined;
-  teamId: TeamId | null;
-}) {
-  const getOAuthUrl = useAction(api.zoom.getOAuthConnectUrl);
-  const clear = useAction(api.zoom.clearCreds);
-  const [advancedOpen, setAdvancedOpen] = useState(false);
-  const [busy, setBusy] = useState<"idle" | "connecting" | "clearing">(
-    "idle",
-  );
-  const [err, setErr] = useState<string | null>(null);
-
-  const onConnect = async () => {
-    if (!teamId) return;
-    setBusy("connecting");
-    setErr(null);
-    try {
-      const res = await getOAuthUrl({
-        teamId,
-        returnTo: window.location.href,
-      });
-      if ("error" in res) {
-        setErr(res.error);
-      } else {
-        // Open in a popup so we can detect connect-complete via
-        // postMessage and refresh the status query.
-        const popup = window.open(
-          res.url,
-          "otto-zoom-oauth",
-          "width=560,height=720",
-        );
-        if (!popup) {
-          // Pop-up blocked — fall back to a full-page redirect.
-          window.location.href = res.url;
-          return;
-        }
-        // The callback page sends "otto-zoom-connected" / "-error".
-        const onMsg = (e: MessageEvent) => {
-          if (e.data?.type === "otto-zoom-connected") {
-            window.removeEventListener("message", onMsg);
-            // Convex live-queries will re-fetch automatically.
-          } else if (e.data?.type === "otto-zoom-error") {
-            window.removeEventListener("message", onMsg);
-            setErr("zoom denied or returned an error");
-          }
-        };
-        window.addEventListener("message", onMsg);
-      }
-    } catch (e) {
-      setErr((e as Error).message);
-    } finally {
-      setBusy("idle");
-    }
-  };
-
-  const onDisconnect = async () => {
-    if (!teamId) return;
-    setBusy("clearing");
-    setErr(null);
-    try {
-      await clear({ teamId });
-    } catch (e) {
-      setErr((e as Error).message);
-    } finally {
-      setBusy("idle");
-    }
-  };
-
-  const connected = !!status?.configured;
-  const oauthLabel =
-    status?.accountEmail ?? status?.accountName ?? "your zoom account";
-
-  return (
-    <div className="zoom-connect">
-      {connected && (
-        <p
-          className="otto-eyebrow"
-          style={{ color: "var(--otto-green)", marginBottom: 8 }}
-        >
-          connected ·{" "}
-          {status?.authType === "oauth"
-            ? `oauth as ${oauthLabel}`
-            : `server-to-server · account ${status?.accountId ?? "—"}`}
-        </p>
-      )}
-
-      <div className="row" style={{ gap: 8, marginTop: 4 }}>
-        <button
-          className="primary"
-          disabled={busy !== "idle"}
-          onClick={onConnect}
-        >
-          {busy === "connecting"
-            ? "opening zoom…"
-            : connected
-              ? "reconnect"
-              : "connect with zoom"}
-        </button>
-        {connected && (
-          <button
-            type="button"
-            className="danger"
-            disabled={busy !== "idle"}
-            onClick={onDisconnect}
-          >
-            {busy === "clearing" ? "…" : "disconnect"}
-          </button>
-        )}
-      </div>
-
-      {err && (
-        <p
-          className="otto-eyebrow"
-          style={{ color: "var(--otto-red)", marginTop: 8 }}
-        >
-          {err}
-        </p>
-      )}
-
-      <details
-        open={advancedOpen}
-        onToggle={(e) =>
-          setAdvancedOpen((e.target as HTMLDetailsElement).open)
-        }
-        style={{ marginTop: 18 }}
-      >
-        <summary
-          className="otto-eyebrow"
-          style={{ cursor: "pointer", color: "var(--otto-pencil)" }}
-        >
-          advanced · use your own server-to-server credentials
-        </summary>
-        <div style={{ marginTop: 10 }}>
-          <ZoomS2SForm
-            configured={connected && status?.authType === "s2s"}
-            accountId={status?.accountId ?? null}
-            teamId={teamId}
-          />
-        </div>
-      </details>
-    </div>
-  );
-}
-
-// Server-to-Server form, kept for power users who want to register
-// their own Zoom Marketplace app (org-wide, no per-user OAuth).
-function ZoomS2SForm({
-  configured,
-  accountId,
-  teamId,
-}: {
-  configured: boolean;
-  accountId: string | null;
-  teamId: TeamId | null;
-}) {
-  const save = useAction(api.zoom.saveCreds);
-  const clear = useAction(api.zoom.clearCreds);
-  const [draft, setDraft] = useState({
-    accountId: "",
-    clientId: "",
-    clientSecret: "",
-  });
-  const [busy, setBusy] = useState<"idle" | "saving" | "clearing">("idle");
-  const [msg, setMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(
-    null,
-  );
-
-  const onSave = async () => {
-    if (!teamId) return;
-    if (
-      !draft.accountId.trim() ||
-      !draft.clientId.trim() ||
-      !draft.clientSecret.trim()
-    )
-      return;
-    setBusy("saving");
-    setMsg(null);
-    try {
-      const res = await save({
-        teamId,
-        accountId: draft.accountId,
-        clientId: draft.clientId,
-        clientSecret: draft.clientSecret,
-      });
-      if (res.ok) {
-        setMsg({
-          kind: "ok",
-          text: "credentials validated · first poll running…",
-        });
-        setDraft({ accountId: "", clientId: "", clientSecret: "" });
-      } else {
-        setMsg({ kind: "err", text: res.error ?? "save failed" });
-      }
-    } catch (e) {
-      setMsg({ kind: "err", text: (e as Error).message });
-    } finally {
-      setBusy("idle");
-    }
-  };
-
-  const onClear = async () => {
-    if (!teamId) return;
-    setBusy("clearing");
-    setMsg(null);
-    try {
-      await clear({ teamId });
-      setMsg({ kind: "ok", text: "credentials cleared" });
-    } catch (e) {
-      setMsg({ kind: "err", text: (e as Error).message });
-    } finally {
-      setBusy("idle");
-    }
-  };
-
-  return (
-    <div className="zoom-creds">
-      {configured && accountId && (
-        <p
-          className="otto-eyebrow"
-          style={{ color: "var(--otto-green)", marginBottom: 8 }}
-        >
-          configured · account {accountId}
-        </p>
-      )}
-      <label className="otto-eyebrow">account id</label>
-      <input
-        value={draft.accountId}
-        onChange={(e) =>
-          setDraft({ ...draft, accountId: e.target.value })
-        }
-        placeholder={configured ? "•••••••• (replace existing)" : "abc123XYZ"}
-        autoComplete="off"
-        spellCheck={false}
-        style={{ width: "100%", marginTop: 4 }}
-      />
-      <label className="otto-eyebrow" style={{ marginTop: 10, display: "block" }}>
-        client id
-      </label>
-      <input
-        value={draft.clientId}
-        onChange={(e) => setDraft({ ...draft, clientId: e.target.value })}
-        placeholder={configured ? "••••••••" : "Z00mApp_clientId"}
-        autoComplete="off"
-        spellCheck={false}
-        style={{ width: "100%", marginTop: 4 }}
-      />
-      <label className="otto-eyebrow" style={{ marginTop: 10, display: "block" }}>
-        client secret
-      </label>
-      <input
-        type="password"
-        value={draft.clientSecret}
-        onChange={(e) =>
-          setDraft({ ...draft, clientSecret: e.target.value })
-        }
-        placeholder={configured ? "••••••••" : ""}
-        autoComplete="off"
-        spellCheck={false}
-        style={{ width: "100%", marginTop: 4 }}
-      />
-      <div className="row" style={{ gap: 8, marginTop: 14 }}>
-        <button
-          className="primary"
-          disabled={
-            !draft.accountId.trim() ||
-            !draft.clientId.trim() ||
-            !draft.clientSecret.trim() ||
-            busy !== "idle"
-          }
-          onClick={onSave}
-        >
-          {busy === "saving"
-            ? "validating…"
-            : configured
-              ? "replace"
-              : "save + connect"}
-        </button>
-        {configured && (
-          <button
-            type="button"
-            className="danger"
-            disabled={busy !== "idle"}
-            onClick={onClear}
-          >
-            {busy === "clearing" ? "…" : "disconnect"}
-          </button>
-        )}
-      </div>
-      {msg && (
-        <p
-          className="otto-eyebrow"
-          style={{
-            marginTop: 8,
-            color: msg.kind === "ok" ? "var(--otto-green)" : "var(--otto-red)",
-          }}
-        >
-          {msg.text}
-        </p>
-      )}
-    </div>
-  );
-}
-
-function granolaVerifyLine(
-  status:
-    | {
-        last: { ok: boolean; ingested: number; error: string | null; at: number } | null;
-        itemsToday: number;
-        apiKeyConfigured: boolean;
-      }
-    | undefined,
-): string {
-  if (!status) return "checking…";
-  if (!status.apiKeyConfigured) return "no api key configured";
-  if (!status.last) return "key saved · waiting for first poll";
-  const lp = status.last;
-  if (!lp.ok) return `last poll ${relTime(lp.at)} · error: ${lp.error ?? "unknown"}`;
-  return `last poll ${relTime(lp.at)} · ${lp.ingested} new note${
-    lp.ingested === 1 ? "" : "s"
-  } · ${status.itemsToday} items today`;
-}
-
-function GranolaKeyForm({
-  configured,
-  teamId,
-}: {
-  configured: boolean;
-  teamId: TeamId | null;
-}) {
-  const save = useAction(api.granola.saveApiKey);
-  const clear = useAction(api.granola.clearApiKey);
-  const [draft, setDraft] = useState("");
-  const [busy, setBusy] = useState<"idle" | "saving" | "clearing">("idle");
-  const [msg, setMsg] = useState<
-    { kind: "ok" | "err"; text: string } | null
-  >(null);
-
-  const onSave = async () => {
-    if (!draft.trim() || !teamId) return;
-    setBusy("saving");
-    setMsg(null);
-    try {
-      const res = await save({ teamId, key: draft });
-      if (res.ok) {
-        setMsg({ kind: "ok", text: "key validated · first poll running…" });
-        setDraft("");
-      } else {
-        setMsg({ kind: "err", text: res.error ?? "save failed" });
-      }
-    } catch (e) {
-      setMsg({ kind: "err", text: (e as Error).message });
-    } finally {
-      setBusy("idle");
-    }
-  };
-
-  const onClear = async () => {
-    if (!teamId) return;
-    setBusy("clearing");
-    setMsg(null);
-    try {
-      await clear({ teamId });
-      setMsg({ kind: "ok", text: "key cleared" });
-    } catch (e) {
-      setMsg({ kind: "err", text: (e as Error).message });
-    } finally {
-      setBusy("idle");
-    }
-  };
-
-  return (
-    <div className="granola-key">
-      <label htmlFor="granola-key-input" className="otto-eyebrow">
-        granola api key
-      </label>
-      <div className="row" style={{ gap: 8, marginTop: 6 }}>
-        <input
-          id="granola-key-input"
-          type="password"
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          placeholder={configured ? "•••••••• (replace existing key)" : "grn_…"}
-          autoComplete="off"
-          spellCheck={false}
-          style={{ flex: 1, fontFamily: "var(--otto-font-mono)" }}
-        />
-        <button
-          type="button"
-          className="primary"
-          disabled={!draft.trim() || busy !== "idle"}
-          onClick={onSave}
-        >
-          {busy === "saving" ? "validating…" : configured ? "replace" : "save"}
-        </button>
-        {configured && (
-          <button
-            type="button"
-            className="danger"
-            disabled={busy !== "idle"}
-            onClick={onClear}
-          >
-            {busy === "clearing" ? "…" : "clear"}
-          </button>
-        )}
-      </div>
-      {msg && (
-        <p
-          className="otto-eyebrow"
-          style={{
-            marginTop: 8,
-            color:
-              msg.kind === "ok"
-                ? "var(--otto-green)"
-                : "var(--otto-red)",
-          }}
-        >
-          {msg.text}
-        </p>
-      )}
-    </div>
   );
 }
 
@@ -1252,10 +700,3 @@ function GithubInstall({
   );
 }
 
-function relTime(at: number): string {
-  const d = (Date.now() - at) / 1000;
-  if (d < 60) return `${Math.round(d)}s ago`;
-  if (d < 3600) return `${Math.round(d / 60)}m ago`;
-  if (d < 86400) return `${Math.round(d / 3600)}h ago`;
-  return new Date(at).toLocaleDateString();
-}

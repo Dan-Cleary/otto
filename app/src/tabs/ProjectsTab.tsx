@@ -81,8 +81,7 @@ export function ProjectsTab() {
         <p className="muted" style={{ fontSize: 12, marginTop: 0 }}>
           projects group repos by what they are for the team — orders,
           customers, refunds. otto routes widget feedback to a project by
-          matching the page URL against its patterns; meeting items match
-          on the description.
+          matching the page URL against its patterns.
         </p>
         <div
           style={{

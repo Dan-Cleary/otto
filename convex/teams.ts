@@ -169,6 +169,23 @@ export const widgetSecret = query({
   },
 });
 
+// Member-readable presence check used by the onboarding wizard and
+// the persistent SetupBanner. Mirrors cursorDb.status / githubDb.status
+// shape so the wizard can treat all required gates uniformly.
+export const widgetStatus = query({
+  args: { teamId: v.id("teams") },
+  handler: async (ctx, { teamId }) => {
+    await requireTeamMember(ctx, teamId);
+    const row = await ctx.db
+      .query("settings")
+      .withIndex("by_team_key", (q) =>
+        q.eq("teamId", teamId).eq("key", WIDGET_SECRET_KEY),
+      )
+      .first();
+    return { configured: typeof row?.value === "string" };
+  },
+});
+
 export const rotateWidgetSecret = mutation({
   args: { teamId: v.id("teams") },
   handler: async (ctx, { teamId }) => {
