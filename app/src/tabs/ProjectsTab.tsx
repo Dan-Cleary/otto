@@ -199,16 +199,17 @@ function ProjectCard({
       <div
         className="muted"
         style={{
-          fontFamily: "var(--otto-font-mono)",
           fontSize: 11,
           marginBottom: 12,
           minHeight: 14,
         }}
       >
-        {project.urlPatterns.length === 0 ? (
-          <span className="subtle">no url patterns</span>
+        {project.primaryRepoName ? (
+          <span style={{ fontFamily: "var(--otto-font-mono)" }}>
+            → {project.primaryRepoName}
+          </span>
         ) : (
-          project.urlPatterns.slice(0, 2).join(" · ")
+          <span className="subtle">no repo connected</span>
         )}
       </div>
       <div className="row" style={{ gap: 18, fontSize: 12 }}>
@@ -281,16 +282,14 @@ function ProjectDetail({
           <h2 style={{ margin: 0 }}>{project.name}</h2>
           <div
             className="muted"
-            style={{
-              fontFamily: "var(--otto-font-mono)",
-              fontSize: 11,
-              marginTop: 4,
-            }}
+            style={{ fontSize: 11, marginTop: 4 }}
           >
-            {project.urlPatterns.length === 0 ? (
-              <span className="subtle">no url patterns</span>
+            {project.primaryRepoName ? (
+              <span style={{ fontFamily: "var(--otto-font-mono)" }}>
+                → {project.primaryRepoName}
+              </span>
             ) : (
-              project.urlPatterns.join(" · ")
+              <span className="subtle">no repo connected</span>
             )}
           </div>
         </div>
@@ -540,28 +539,23 @@ function ProjectEditForm({
 
   const [draft, setDraft] = useState({
     name: existing.name,
-    slug: existing.slug,
-    description: existing.description,
-    urlPatterns: existing.urlPatterns.join("\n"),
     primaryRepoId: existing.primaryRepoId ?? "",
     enabled: existing.enabled,
   });
 
   const onSave = async () => {
     if (!teamId) return;
-    const patterns = draft.urlPatterns
-      .split("\n")
-      .map((p) => p.trim())
-      .filter(Boolean);
     await upsert({
       teamId,
       id: existing._id,
       name: draft.name,
-      slug:
-        draft.slug ||
-        draft.name.toLowerCase().replace(/[^a-z0-9-]+/g, "-"),
-      description: draft.description,
-      urlPatterns: patterns,
+      // Slug auto-derives; users never see or set it themselves.
+      slug: draft.name.toLowerCase().replace(/[^a-z0-9-]+/g, "-"),
+      // Description, urlPatterns: kept on the model for backward compat
+      // with existing projects but no longer surfaced in the UI. We
+      // preserve any existing values rather than blowing them away.
+      description: existing.description,
+      urlPatterns: existing.urlPatterns,
       primaryRepoId: draft.primaryRepoId
         ? (draft.primaryRepoId as Id<"repos">)
         : null,
@@ -580,44 +574,11 @@ function ProjectEditForm({
   return (
     <div className="card">
       <h3 style={{ marginTop: 0 }}>edit project</h3>
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: 12,
-        }}
-      >
-        <div>
-          <label className="otto-eyebrow">name</label>
-          <input
-            value={draft.name}
-            onChange={(e) => setDraft({ ...draft, name: e.target.value })}
-            style={{ width: "100%" }}
-          />
-        </div>
-        <div>
-          <label className="otto-eyebrow">slug</label>
-          <input
-            value={draft.slug}
-            onChange={(e) => setDraft({ ...draft, slug: e.target.value })}
-            style={{ width: "100%" }}
-          />
-        </div>
-      </div>
-      <label
-        className="otto-eyebrow"
-        style={{ marginTop: 12, display: "block" }}
-      >
-        url patterns · one per line
-      </label>
-      <textarea
-        rows={3}
-        placeholder={"internal.acme.com/orders*\n*.acme.com/checkout/*"}
-        value={draft.urlPatterns}
-        onChange={(e) =>
-          setDraft({ ...draft, urlPatterns: e.target.value })
-        }
-        style={{ width: "100%", fontFamily: "var(--otto-font-mono)" }}
+      <label className="otto-eyebrow">name</label>
+      <input
+        value={draft.name}
+        onChange={(e) => setDraft({ ...draft, name: e.target.value })}
+        style={{ width: "100%" }}
       />
       <div
         style={{

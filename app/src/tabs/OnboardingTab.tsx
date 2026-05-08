@@ -7,17 +7,11 @@ import { useTeam, type TeamId } from "../teamContext";
 type StepStatus = "ready" | "needed" | "checking";
 
 export function OnboardingTab() {
-  const convexUrl = (import.meta.env.VITE_CONVEX_URL as string | undefined) ?? "";
-  const siteUrl = convexUrl.replace(".convex.cloud", ".convex.site");
   const { teamId } = useTeam();
   const items = useQuery(
     api.admin.recentItems,
     teamId ? { teamId, limit: 50 } : "skip",
   );
-  const repos = useQuery(
-    api.reposDb.list,
-    teamId ? { teamId } : "skip",
-  ) as { _id: string; enabled: boolean }[] | undefined;
   const cursorStatus = useQuery(
     api.cursorDb.status,
     teamId ? { teamId } : "skip",
@@ -37,26 +31,12 @@ export function OnboardingTab() {
       }
     | undefined;
 
-  const flags = useMemo(() => {
-    if (!items) return null;
-    return {
-      widget: items.some((i) => i.sourceType === "widget"),
-      slack: items.some(
-        (i) =>
-          i.status === "queued" ||
-          i.status === "approved" ||
-          i.status === "rejected",
-      ),
-    };
-  }, [items]);
+  const widgetEvent = useMemo(
+    () => !!items?.some((i) => i.sourceType === "widget"),
+    [items],
+  );
 
-  const reposReady = !!(repos && repos.some((r) => r.enabled));
-  const reposStepStatus: StepStatus = reposReady
-    ? "ready"
-    : repos === undefined
-      ? "checking"
-      : "needed";
-  const widgetStepStatus: StepStatus = flags?.widget
+  const widgetStepStatus: StepStatus = widgetEvent
     ? "ready"
     : items === undefined
       ? "checking"
@@ -79,8 +59,6 @@ export function OnboardingTab() {
   ) as string | null | undefined;
   const rotateWidgetSecret = useMutation(api.teams.rotateWidgetSecret);
 
-  const slackInteractionsUrl = `${siteUrl || "https://YOUR-CONVEX.convex.site"}/slack/interactions`;
-
   return (
     <div className="onboarding">
       <header className="onboarding-hero">
@@ -91,7 +69,6 @@ export function OnboardingTab() {
               widgetStepStatus,
               cursorStepStatus,
               githubStepStatus,
-              reposStepStatus,
             )
               ? "done"
               : "thinking"
@@ -110,14 +87,13 @@ export function OnboardingTab() {
         widget={widgetStepStatus}
         cursor={cursorStepStatus}
         github={githubStepStatus}
-        repos={reposStepStatus}
       />
 
       <Step
         n={1}
         glyph="inbox"
         title="drop the widget"
-        status={flags?.widget ? "ready" : "needed"}
+        status={widgetStepStatus}
         verify="otto sees a widget event"
         required="required"
       >
@@ -206,66 +182,14 @@ export function OnboardingTab() {
         </Hint>
       </Step>
 
-      <Step
-        n={4}
-        glyph="task"
-        title="register a repo"
-        status={reposStepStatus}
-        verify="at least one repo is enabled"
-        required="optional"
-      >
-        <p>
-          add a repo in the <strong>repos</strong> tab: github full name +
-          one-sentence description. otto embeds the description for routing.
-        </p>
-        <Hint>
-          start with two or three repos otto knows well. expand only after
-          you&rsquo;ve seen drafts that look right — bad routing is the
-          fastest way to lose trust in the daemon.
-        </Hint>
-      </Step>
-
-      <Step
-        n={5}
-        glyph="ripple"
-        title="connect slack"
-        platform="slack"
-        status={flags?.slack ? "ready" : "needed"}
-        verify="otto has queued at least one item"
-        required="optional"
-      >
-        <p>
-          low-confidence items route to slack for human approval. set
-          these env vars and point the slack app at otto&rsquo;s
-          interactivity url.
-        </p>
-        <CodeBlock
-          language="bash"
-          code={[
-            "npx convex env set SLACK_BOT_TOKEN xoxb-…",
-            "npx convex env set SLACK_SIGNING_SECRET …",
-            "npx convex env set SLACK_REVIEW_CHANNEL C0123456789",
-          ].join("\n")}
-        />
-        <CodeBlock
-          language="config"
-          label="slack app · interactivity"
-          code={slackInteractionsUrl}
-        />
-        <Hint>
-          required bot scopes: <code>chat:write</code>,{" "}
-          <code>channels:history</code>. tune the threshold under{" "}
-          <strong>settings</strong> — items below that confidence land in the
-          review channel rather than going straight to a draft.
-        </Hint>
-      </Step>
-
       <footer className="onboarding-footer">
-        <span className="otto-eyebrow">verify <span className="sep">//</span> daemon log</span>
+        <span className="otto-eyebrow">
+          next <span className="sep">//</span> install the widget
+        </span>
         <p className="muted" style={{ margin: 0 }}>
-          once a step is live, the matching event shows up in the{" "}
-          <strong>activity</strong> tab. if nothing appears, check{" "}
-          <code>npx convex logs</code> for ingest errors.
+          once these three are live, head to{" "}
+          <strong>projects</strong>, create a project, and grab the
+          per-project widget snippet to drop on your app.
         </p>
       </footer>
     </div>
@@ -278,13 +202,11 @@ function ProgressStrip(props: {
   widget: StepStatus;
   cursor: StepStatus;
   github: StepStatus;
-  repos: StepStatus;
 }) {
   const cells = [
     { name: "widget", status: props.widget },
     { name: "cursor", status: props.cursor },
     { name: "github", status: props.github },
-    { name: "repos", status: props.repos },
   ];
   const ready = cells.filter((c) => c.status === "ready").length;
   return (
@@ -365,45 +287,6 @@ function Step({
   );
 }
 
-function CodeBlock({
-  code,
-  language,
-  label,
-}: {
-  code: string;
-  language?: string;
-  label?: string;
-}) {
-  const [copied, setCopied] = useState(false);
-  const onCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(code);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1400);
-    } catch {
-      /* clipboard blocked — silently ignore */
-    }
-  };
-  return (
-    <div className="codeblock">
-      <div className="codeblock-bar">
-        <span className="otto-eyebrow">
-          {label ?? language ?? "snippet"}
-        </span>
-        <button
-          type="button"
-          className="copy-btn"
-          onClick={onCopy}
-          aria-label="copy to clipboard"
-        >
-          {copied ? "copied" : "copy"}
-        </button>
-      </div>
-      <pre>{code}</pre>
-    </div>
-  );
-}
-
 function Hint({ children }: { children: React.ReactNode }) {
   return (
     <div className="hint">
@@ -428,13 +311,9 @@ function allReady(
   widget: StepStatus,
   cursor: StepStatus,
   github: StepStatus,
-  repos: StepStatus,
 ): boolean {
   return (
-    widget === "ready" &&
-    cursor === "ready" &&
-    github === "ready" &&
-    repos === "ready"
+    widget === "ready" && cursor === "ready" && github === "ready"
   );
 }
 
