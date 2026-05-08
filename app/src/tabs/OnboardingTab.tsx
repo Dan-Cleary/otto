@@ -79,13 +79,6 @@ export function OnboardingTab() {
   ) as string | null | undefined;
   const rotateWidgetSecret = useMutation(api.teams.rotateWidgetSecret);
 
-  const widgetSnippet = `<script
-  src="https://YOUR-STATIC-HOST/otto.js"
-  data-endpoint="${siteUrl || "https://YOUR-CONVEX.convex.site"}/ingest/widget"
-  data-secret="${widgetSecret ?? "<click 'create widget secret' below>"}"
-  defer
-></script>`;
-
   const slackInteractionsUrl = `${siteUrl || "https://YOUR-CONVEX.convex.site"}/slack/interactions`;
 
   return (
@@ -129,13 +122,11 @@ export function OnboardingTab() {
         required="required"
       >
         <p>
-          otto&rsquo;s primary input. build the bundle with{" "}
-          <code>npm run widget:build</code>, host{" "}
-          <code>widget/dist/otto.js</code> on any static host, then paste
-          this onto the qa or prod build of your app — your team uses it
-          to flag bugs and feedback.
+          otto&rsquo;s primary input. each project has its own snippet
+          (find it on the project page) — feedback from a project&rsquo;s
+          widget routes there directly. you only need to set the team
+          secret once, here.
         </p>
-        <CodeBlock language="html" code={widgetSnippet} />
         <div className="row" style={{ gap: 8 }}>
           <button
             type="button"
@@ -153,10 +144,10 @@ export function OnboardingTab() {
           )}
         </div>
         <Hint>
-          the secret above is per-team and lives in this deployment&rsquo;s
-          database. paste the snippet on the page you want to collect
-          feedback from — otto figures out which project (and therefore
-          which repo) by matching the URL against your project patterns.
+          go to <strong>projects → pick one → install the widget</strong>{" "}
+          to grab the per-project snippet. the team secret above is the
+          shared piece; the project id baked into each snippet tells
+          otto where the feedback belongs.
         </Hint>
       </Step>
 

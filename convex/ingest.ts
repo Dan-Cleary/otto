@@ -71,14 +71,19 @@ export const recordWidget = internalMutation({
     teamId: v.id("teams"),
     sourceRef: v.string(),
     payload: v.any(),
+    // Optional — set when the widget snippet declared `data-project`.
+    // The HTTP route already validated ownership against the team, so
+    // we trust it here.
+    projectId: v.optional(v.id("projects")),
   },
-  handler: async (ctx, { teamId, sourceRef, payload }) => {
+  handler: async (ctx, { teamId, sourceRef, payload, projectId }) => {
     const id = await ctx.db.insert("ingestEvents", {
       sourceType: "widget",
       sourceRef,
       payload,
       receivedAt: Date.now(),
       teamId,
+      projectId,
     });
 
     await ctx.db.insert("auditLog", {
@@ -95,6 +100,18 @@ export const recordWidget = internalMutation({
     });
 
     return id;
+  },
+});
+
+// Used by the widget HTTP route to confirm a posted projectId belongs
+// to the team that owns the secret. If the project was deleted or
+// belongs to a different team, the route ignores the field and falls
+// back to URL-pattern routing.
+export const verifyProjectInTeam = internalQuery({
+  args: { teamId: v.id("teams"), projectId: v.id("projects") },
+  handler: async (ctx, { teamId, projectId }) => {
+    const p = await ctx.db.get(projectId);
+    return p && p.teamId === teamId ? true : false;
   },
 });
 

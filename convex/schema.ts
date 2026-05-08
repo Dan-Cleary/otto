@@ -90,6 +90,10 @@ export default defineSchema({
     payload: v.any(),
     receivedAt: v.number(),
     teamId: v.optional(v.id("teams")),
+    // Set when the widget snippet declared `data-project="<id>"`.
+    // The HTTP ingest route validates team ownership before persisting,
+    // so the parser can trust this and skip URL-pattern matching.
+    projectId: v.optional(v.id("projects")),
   })
     .index("by_source", ["sourceType", "sourceRef"])
     .index("by_team", ["teamId"]),

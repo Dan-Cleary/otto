@@ -34,8 +34,24 @@ export const persistItems = internalMutation({
     { ingestEventId, teamId, sourceType, sourceRef, widgetUrl, items },
   ) => {
     let project: { projectId: any; primaryRepoId: any } | null = null;
-    if (sourceType === "widget" && widgetUrl) {
-      project = await resolveProjectFromUrl(ctx, teamId, widgetUrl);
+    let routedBy: "snippet" | "url-pattern" | "router" = "router";
+
+    if (sourceType === "widget") {
+      // Prefer the `data-project` declared on the widget snippet — it's
+      // already team-validated at the HTTP route. Fall back to URL
+      // pattern matching only when the snippet didn't declare one.
+      const ev = await ctx.db.get(ingestEventId);
+      if (ev?.projectId) {
+        const p = await ctx.db.get(ev.projectId);
+        if (p && p.teamId === teamId) {
+          project = { projectId: p._id, primaryRepoId: p.primaryRepoId };
+          routedBy = "snippet";
+        }
+      }
+      if (!project && widgetUrl) {
+        project = await resolveProjectFromUrl(ctx, teamId, widgetUrl);
+        if (project) routedBy = "url-pattern";
+      }
     }
 
     for (const it of items) {
@@ -62,7 +78,7 @@ export const persistItems = internalMutation({
         payload: {
           description: it.description,
           confidence: it.confidence,
-          routedBy: project?.primaryRepoId ? "url-pattern" : "router",
+          routedBy: project ? routedBy : "router",
           projectId: project?.projectId ?? null,
         },
         actor: "system",
