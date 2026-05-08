@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" shape-rendering="crispEdges">
+  <title>cat silhouette</title>
+  <polygon points="6,3 9,7 15,7 18,3 18,9 20,12 20,17 15,20 9,20 4,17 4,12 6,9" />
+  <rect x="9" y="13" width="2" height="2" fill="currentColor" />
+  <rect x="13" y="13" width="2" height="2" fill="currentColor" />
+</svg>

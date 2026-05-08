@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>otto — meetings in, draft prs out</title>
+  <title>otto — your team flags it, otto ships the fix</title>
   <meta
     name="description"
-    content="otto joins your meetings, picks out the code-shaped action items, and opens draft pull requests on the right repo. never auto-merges."
+    content="drop the otto widget in your app. your team flags bugs and feedback while testing. otto reads each report, finds the relevant code, and opens a draft pull request. never auto-merges."
   />
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-  <meta property="og:title" content="otto — meetings in, draft prs out" />
+  <meta property="og:title" content="otto — your team flags it, otto ships the fix" />
   <meta
     property="og:description"
-    content="meeting ends. draft pr lands minutes later. otto reads transcripts, pulls action items, opens prs. never auto-merges."
+    content="drop the otto widget in your app. team flags bugs in qa or prod, otto opens a draft pr on the right repo. never auto-merges."
   />
   <meta property="og:image" content="/og.png" />
   <meta property="og:url" content="https://ottoagent.app" />
@@ -87,6 +87,16 @@
     }
     .nav-links a { color: var(--pencil); text-decoration: none; }
     .nav-links a:hover { color: var(--ink); }
+    .nav-links a.nav-cta {
+      background: var(--ink);
+      color: var(--cream);
+      padding: 6px 12px;
+      letter-spacing: var(--eyebrow);
+    }
+    .nav-links a.nav-cta:hover {
+      background: var(--amber-dim);
+      color: var(--cream);
+    }
 
     /* ── Hero ─────────────────────────────────────────────── */
     .hero {
@@ -261,6 +271,16 @@
       text-transform: uppercase;
       color: var(--pencil);
     }
+    /* Integration logos use a CSS mask so they pick up brand color
+       without committing currentColor inside each SVG. */
+    .integration-glyph {
+      display: inline-block;
+      width: 20px; height: 20px;
+      background-color: var(--amber-dim, #a87528);
+      -webkit-mask: var(--g-url) no-repeat center / contain;
+      mask: var(--g-url) no-repeat center / contain;
+      vertical-align: middle;
+    }
     .step h3 {
       font-family: var(--display);
       font-size: 26px;
@@ -274,121 +294,6 @@
       line-height: 1.6;
       color: var(--ink);
     }
-
-    /* ── Surfaces ─────────────────────────────────────────── */
-    .surfaces {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 16px;
-    }
-    .surface {
-      background: var(--cream);
-      border: 1px solid var(--hair);
-      padding: 22px 22px 24px;
-      display: flex;
-      gap: 16px;
-      align-items: flex-start;
-    }
-    .surface img { flex-shrink: 0; }
-    .surface .body { flex: 1; }
-    .surface h4 {
-      font-family: var(--display);
-      font-size: 22px;
-      margin: 0 0 4px;
-      line-height: 1;
-    }
-    .surface .where {
-      font-family: var(--mono);
-      font-size: 10px;
-      letter-spacing: var(--eyebrow);
-      text-transform: uppercase;
-      color: var(--pencil);
-      margin-bottom: 10px;
-    }
-    .surface p {
-      margin: 0;
-      font-family: var(--mono);
-      font-size: 12px;
-      color: var(--ink);
-      line-height: 1.55;
-    }
-
-    /* ── Quote / voice ────────────────────────────────────── */
-    .quote {
-      background: var(--cream);
-      border: 1px solid var(--ink);
-      box-shadow: 6px 6px 0 var(--hair);
-      padding: 32px 32px 28px;
-      position: relative;
-    }
-    .quote .from {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-family: var(--mono);
-      font-size: 10px;
-      letter-spacing: var(--eyebrow);
-      text-transform: uppercase;
-      color: var(--pencil);
-      margin-bottom: 12px;
-    }
-    .quote blockquote {
-      margin: 0;
-      font-family: var(--mono);
-      font-size: 14px;
-      line-height: 1.65;
-      color: var(--ink);
-      border-left: 4px solid var(--amber);
-      padding: 4px 0 4px 16px;
-    }
-    .quote blockquote::before { content: "otto: "; color: var(--amber-dim); }
-
-    /* ── Daybook (mini queue) ─────────────────────────────── */
-    .board {
-      background: var(--bg);
-      border: 1px solid var(--ink);
-      box-shadow: 4px 4px 0 var(--hair);
-    }
-    .board .head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 16px;
-      background: var(--panel);
-      border-bottom: 1px solid var(--hair);
-    }
-    .board .head .left { display: inline-flex; align-items: center; gap: 10px; }
-    .board .head .name { font-family: var(--display); font-size: 22px; line-height: 1; }
-    .board .head .pill {
-      font-family: var(--mono);
-      font-size: 10px;
-      color: var(--pencil);
-      letter-spacing: var(--eyebrow);
-      text-transform: uppercase;
-    }
-    .row {
-      display: grid;
-      grid-template-columns: 70px 1fr 130px 90px;
-      gap: 12px;
-      padding: 10px 16px;
-      border-bottom: 1px dashed var(--hair);
-      align-items: center;
-      font-size: 12px;
-    }
-    .row:last-child { border-bottom: 0; }
-    .row .id { font-family: var(--mono); color: var(--pencil); font-size: 11px; }
-    .row .repo { font-family: var(--mono); color: var(--pencil); font-size: 10px; }
-    .badge {
-      font-family: var(--mono);
-      font-size: 10px;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      text-align: right;
-    }
-    .badge.drafted { color: var(--green); }
-    .badge.routing { color: var(--amber); }
-    .badge.extract { color: var(--amber-dim); }
-    .badge.error   { color: var(--red); }
 
     /* ── Final CTA ────────────────────────────────────────── */
     .end {
@@ -433,23 +338,20 @@
       .steps { grid-template-columns: 1fr; }
       .step { border-right: 0; border-bottom: 1px dashed var(--hair); }
       .step:last-child { border-bottom: 0; }
-      .surfaces { grid-template-columns: 1fr; }
-      .row { grid-template-columns: 60px 1fr 80px; }
-      .row .repo { display: none; }
     }
 
     @media (max-width: 480px) {
-      /* Top nav: hide the in-page links, keep the lockup + dashboard CTA. */
+      /* Top nav: hide in-page links; keep log in + sign up. */
       .nav { padding: 16px 20px; }
       .nav-links { gap: 12px; font-size: 10px; }
-      .nav-links a:not([href="/login"]) { display: none; }
+      .nav-links a:not([href="/login"]):not([href="/signup"]) { display: none; }
       .lockup .name { font-size: 22px; }
       .lockup img { width: 28px; height: 28px; }
       .version { font-size: 12px; padding: 1px 5px 0; }
 
       /* Hero */
       .hero { padding: 28px 20px 48px; gap: 24px; }
-      h1 { font-size: 44px; line-height: 1; }
+      h1 { font-size: 36px; line-height: 1; }
       .lede { font-size: 14px; line-height: 1.55; }
       .cta { flex-wrap: wrap; gap: 8px; margin-top: 20px; }
       .btn { font-size: 10px; padding: 11px 14px; }
@@ -466,29 +368,6 @@
       .step { padding: 22px 18px 24px; gap: 12px; }
       .step h3 { font-size: 22px; }
       .step .num { font-size: 36px; }
-
-      /* Surfaces stack within each row */
-      .surface { padding: 18px 16px; flex-direction: row; gap: 14px; }
-      .surface h4 { font-size: 18px; }
-      .surface p { font-size: 11px; }
-      .surface .where { font-size: 9px; }
-
-      /* Mini daybook board */
-      .board .head { padding: 10px 12px; }
-      .board .head .name { font-size: 18px; }
-      .board .head img { width: 32px; height: 32px; }
-      .board .head .pill { font-size: 9px; }
-      .row { grid-template-columns: 52px 1fr 64px; padding: 9px 12px; font-size: 11px; gap: 8px; }
-      .row .id { font-size: 10px; }
-      .row .badge { font-size: 9px; }
-      .row span:nth-child(2) { /* meeting title */
-        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-      }
-
-      /* Voice quote */
-      .quote { padding: 22px 20px 20px; }
-      .quote blockquote { font-size: 13px; padding-left: 12px; }
-      .quote .from { font-size: 9px; }
 
       /* End section */
       .end { padding: 64px 20px 80px; }
@@ -510,24 +389,23 @@
     </span>
     <span class="nav-links">
       <a href="#how">how it works</a>
-      <a href="#surfaces">surfaces</a>
-      <a href="#voice">voice</a>
-      <a href="/login">dashboard</a>
+      <a href="/login">log in</a>
+      <a href="/signup" class="nav-cta">sign up</a>
     </span>
   </nav>
 
   <header class="hero">
     <div>
       <p class="eyebrow">your engineering agent <span class="sep">//</span> v0.4</p>
-      <h1>otto joins your meetings.<br/><em>otto ships the changes.</em></h1>
+      <h1>your team flags it.<br/><em>otto ships the fix.</em></h1>
       <p class="lede">
-        meeting ends, draft pr lands minutes later. otto reads your
-        meeting transcripts, pulls out the code-shaped action items, and
-        opens reviewable pull requests on the right repo.
-        <strong>never auto-merges.</strong>
+        drop otto&rsquo;s widget into your app. your team flags bugs and
+        feedback while testing — qa or prod. otto reads each report,
+        finds the relevant code, and opens a draft pull request on the
+        right repo. <strong>never auto-merges.</strong>
       </p>
       <div class="cta">
-        <a href="/login" class="btn btn-primary">open dashboard</a>
+        <a href="/signup" class="btn btn-primary">get started</a>
         <a href="#how" class="btn btn-ghost">see how it works</a>
       </div>
     </div>
@@ -540,25 +418,20 @@
   <!-- ── How it works ───────────────────────────────────────── -->
   <section id="how">
     <p class="eyebrow">how it works <span class="sep">//</span> three steps</p>
-    <h2>standup &rarr; pr</h2>
-    <p class="section-lede">
-      otto runs in the background. it pulls each new transcript and feedback
-      item off the queue, figures out what changed, and writes a draft pr a
-      human can land in minutes — not days.
-    </p>
+    <h2>flag &rarr; pr</h2>
 
     <div class="steps">
       <div class="step">
         <div class="num">01</div>
         <div class="glyph-row">
-          <img src="/otto/glyphs/glyph-notebook.svg" width="20" height="20" alt="notebook" />
-          granola <span style="color:#8a8270">/</span> zoom
+          <img src="/otto/glyphs/glyph-inbox.svg" width="20" height="20" alt="widget" />
+          widget <span style="color:#8a8270">/</span> in-app
         </div>
-        <h3>otto listens</h3>
+        <h3>your team flags it</h3>
         <p>
-          connect granola or zoom once. otto pulls every new meeting
-          transcript on its own — never joins the call. the widget
-          covers anything you'd file from a dashboard between meetings.
+          drop the otto widget on your qa or prod build. anyone on your
+          team can submit a bug or feedback in two clicks — text, page
+          url, recent console errors.
         </p>
       </div>
 
@@ -584,125 +457,10 @@
         </div>
         <h3>otto drafts</h3>
         <p>
-          a draft pr lands in your code host with the original feedback
-          attached. you review, tweak, merge — or hand it back. otto
-          never auto-merges.
+          a draft pr lands in github with the original report attached.
+          you review, tweak, merge — or hand it back. otto never
+          auto-merges.
         </p>
-      </div>
-    </div>
-  </section>
-
-  <!-- ── Surfaces ───────────────────────────────────────────── -->
-  <section id="surfaces" style="background: var(--panel); margin-left: 0; max-width: 100%; padding-left: 0; padding-right: 0;">
-    <div style="max-width:1080px; margin:0 auto; padding: 0 28px;">
-      <p class="eyebrow">surfaces <span class="sep">//</span> where otto shows up</p>
-      <h2>four places.<br/>one otter.</h2>
-      <p class="section-lede">
-        otto&rsquo;s native surface uses paper + amber. inside third-party
-        platforms — github, slack, your ide — only the small avatar
-        carries the brand. host design wins everywhere else.
-      </p>
-
-      <div class="surfaces">
-        <div class="surface">
-          <img src="/otto/glyphs/glyph-task.svg" width="32" height="32" alt="task" />
-          <div class="body">
-            <h4>otto&rsquo;s daybook</h4>
-            <div class="where">native · paper + amber</div>
-            <p>queue, status, history. the otter front and center.</p>
-          </div>
-        </div>
-        <div class="surface">
-          <img src="/otto/glyphs/glyph-branch.svg" width="32" height="32" alt="branch" />
-          <div class="body">
-            <h4>code-host pr card</h4>
-            <div class="where">github · gitlab · bitbucket</div>
-            <p>otto&rsquo;s draft, in your normal pr ui. only the avatar marks it.</p>
-          </div>
-        </div>
-        <div class="surface">
-          <img src="/otto/glyphs/glyph-ripple.svg" width="32" height="32" alt="ripple" />
-          <div class="body">
-            <h4>team chat</h4>
-            <div class="where">slack · teams · discord</div>
-            <p>&ldquo;3 drafts ready for review.&rdquo; one ping per batch.</p>
-          </div>
-        </div>
-        <div class="surface">
-          <img src="/otto/glyphs/glyph-pawprint.svg" width="32" height="32" alt="pawprint" />
-          <div class="body">
-            <h4>ide inline panel</h4>
-            <div class="where">vscode · cursor · jetbrains</div>
-            <p>suggested edits show up next to the code, with the source.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ── Voice ──────────────────────────────────────────────── -->
-  <section id="voice">
-    <p class="eyebrow">voice <span class="sep">//</span> first-person, brief</p>
-    <h2>how otto talks</h2>
-    <p class="section-lede">
-      otto writes its own pr descriptions. confident, brief, first-person.
-      never peppy, never apologetic, never emoji-heavy.
-    </p>
-
-    <div class="quote">
-      <div class="from">
-        <img src="/otto/sprites/otter-done.svg" width="28" height="28" alt="otto" />
-        otto · pr #284 · acme/web
-      </div>
-      <blockquote>
-        i drafted this from widget feedback. the export button on the orders
-        dashboard fires even with zero rows selected. added a disabled state
-        and an aria-disabled hint. tests pass locally. the original report is
-        linked below — please confirm the empty-state copy reads okay.
-      </blockquote>
-    </div>
-  </section>
-
-  <!-- ── Mini queue ─────────────────────────────────────────── -->
-  <section>
-    <p class="eyebrow">live <span class="sep">//</span> the queue right now</p>
-    <h2>today&rsquo;s daybook</h2>
-    <p class="section-lede">
-      a snapshot of what otto&rsquo;s holding. the pixel pouch in the otter&rsquo;s
-      paws shows the same status as the row.
-    </p>
-
-    <div class="board">
-      <div class="head">
-        <span class="left">
-          <img src="/otto/sprites/otter-idle.svg" width="40" height="40" alt="otto" />
-          <span class="name">otto</span>
-        </span>
-        <span class="pill">3 in queue · 11 today</span>
-      </div>
-      <div class="row">
-        <span class="id">#284</span>
-        <span>add disabled state to orders export button</span>
-        <span class="repo">acme/web</span>
-        <span class="badge drafted">drafted</span>
-      </div>
-      <div class="row">
-        <span class="id">#283</span>
-        <span>fix sticky header overlap on settings page</span>
-        <span class="repo">acme/web</span>
-        <span class="badge routing">routing</span>
-      </div>
-      <div class="row">
-        <span class="id">#282</span>
-        <span>extract metric definitions from meeting notes</span>
-        <span class="repo">acme/docs</span>
-        <span class="badge extract">extract</span>
-      </div>
-      <div class="row">
-        <span class="id">#281</span>
-        <span>could not route — unknown component reference</span>
-        <span class="repo">acme/api</span>
-        <span class="badge error">error</span>
       </div>
     </div>
   </section>
@@ -712,13 +470,12 @@
     <p class="eyebrow">get started <span class="sep">//</span> early access</p>
     <h2>wake otto up.</h2>
     <p class="lede">
-      connect granola or zoom, drop the widget on a dashboard, and otto
-      starts drafting. v0.4 is read-only-by-default — every diff waits for
-      a human.
+      drop the otto widget in your app and otto starts drafting prs from
+      every report. read-only by default — every diff waits for a human.
     </p>
     <div class="cta" style="justify-content:center;">
-      <a href="/login" class="btn btn-primary">open dashboard</a>
-      <a href="#how" class="btn btn-ghost">how it works</a>
+      <a href="/signup" class="btn btn-primary">sign up</a>
+      <a href="/login" class="btn btn-ghost">log in</a>
     </div>
   </section>
 

@@ -62,8 +62,7 @@ export function AuditTab() {
           <OttoHero size={120} caption="quiet so far" />
           <p style={{ marginTop: 12 }}>No items yet.</p>
           <p className="muted">
-            Drop the widget onto a page or send a Granola transcript to wake
-            Otto up.
+            Drop the widget onto a page to wake Otto up.
           </p>
         </div>
       ) : (
