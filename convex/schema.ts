@@ -169,12 +169,17 @@ export default defineSchema({
       filterFields: ["enabled", "teamId"],
     }),
 
-  // Projects group one or more repos. Widget feedback routes to a
-  // project via the snippet's `data-project="<id>"` attribute, which
-  // is validated team-side at the HTTP ingest route.
+  // Projects group one or more repos. Each project owns its own
+  // widget secret — that's how a posted widget event identifies
+  // which project (and therefore team) it belongs to.
   projects: defineTable({
     name: v.string(),
     slug: v.string(),
+    // Per-project widget secret. Required on new projects; optional
+    // on the schema only because Convex doesn't allow making a
+    // required field that previously didn't exist without a backfill,
+    // and old data is fine to operate on while we add it.
+    widgetSecret: v.optional(v.string()),
     primaryRepoId: v.union(v.id("repos"), v.null()),
     autoFireThreshold: v.optional(v.number()),
     enabled: v.boolean(),

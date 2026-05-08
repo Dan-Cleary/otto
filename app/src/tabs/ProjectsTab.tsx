@@ -248,20 +248,17 @@ function ProjectDetail({
   const projectStats = items ? computeStats(projectItems) : null;
   const noEventsYet = items && projectItems.length === 0;
 
-  // Per-project widget snippet: includes the team secret + this
-  // project's id so feedback flows here directly without URL-pattern
-  // matching.
-  const widgetSecret = useQuery(
-    api.teams.widgetSecret,
-    teamId ? { teamId } : "skip",
-  ) as string | null | undefined;
+  const rotateSecret = useMutation(api.projects.rotateWidgetSecret);
+  // Per-project widget snippet: the project's own secret tells the
+  // server which project (and team) the event belongs to. No team
+  // secret, no URL patterns.
   const convexUrl = (import.meta.env.VITE_CONVEX_URL as string | undefined) ?? "";
   const siteUrl = convexUrl.replace(".convex.cloud", ".convex.site");
+  const widgetSecret = project.widgetSecret;
   const snippet = `<script
   src="https://YOUR-STATIC-HOST/otto.js"
   data-endpoint="${siteUrl || "https://YOUR-CONVEX.convex.site"}/ingest/widget"
-  data-secret="${widgetSecret ?? "<create the team widget secret in settings>"}"
-  data-project="${project._id}"
+  data-secret="${widgetSecret ?? "<rotate to generate a secret>"}"
   defer
 ></script>`;
 
@@ -342,7 +339,7 @@ function ProjectDetail({
         </div>
       )}
 
-      {noEventsYet && (
+      {noEventsYet && widgetSecret && (
         <div className="card">
           <h3 style={{ marginTop: 0 }}>install the widget</h3>
           <p className="muted" style={{ fontSize: 12 }}>
@@ -350,15 +347,27 @@ function ProjectDetail({
             snippet on the staging or prod build of your app — feedback
             from anyone using the widget on that page lands here.
           </p>
-          {widgetSecret ? (
-            <SnippetBlock code={snippet} />
-          ) : (
-            <p style={{ fontSize: 12 }}>
-              create the team widget secret in{" "}
-              <strong>settings → drop the widget</strong> first, then
-              come back to grab the snippet.
-            </p>
-          )}
+          <SnippetBlock code={snippet} />
+          <div
+            className="row"
+            style={{ gap: 8, marginTop: 10, alignItems: "center" }}
+          >
+            <button
+              type="button"
+              onClick={() =>
+                teamId &&
+                confirm(
+                  "rotate this project's widget secret? pages still using the old one will stop sending feedback.",
+                ) &&
+                void rotateSecret({ teamId, id: project._id })
+              }
+            >
+              rotate secret
+            </button>
+            <span className="muted" style={{ fontSize: 11 }}>
+              rotating invalidates pages still using the old secret
+            </span>
+          </div>
         </div>
       )}
 

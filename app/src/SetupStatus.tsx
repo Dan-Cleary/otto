@@ -2,22 +2,21 @@ import { useQuery } from "convex/react";
 import { api } from "./convexApi";
 import type { TeamId } from "./teamContext";
 
-export type RequiredStepKey = "cursor" | "github" | "widget";
+export type RequiredStepKey = "cursor" | "github";
 
 export type SetupSnapshot = {
   loading: boolean;
   // Each key is true once that prerequisite is satisfied.
   cursor: boolean;
   github: boolean;
-  widget: boolean;
-  done: number; // 0..3
-  total: number; // always 3 today
+  done: number; // 0..2
+  total: number; // always 2 today
   ready: boolean; // done === total
 };
 
-// Reads the current team's widget/cursor/github integration status
-// and reduces it to the three required onboarding gates. The
-// dashboard, the wizard, and the persistent banner all read this.
+// Reads the current team's cursor + github integration status and
+// reduces it to the two required onboarding gates. Per-project widget
+// snippets are configured on the project page itself, not here.
 export function useSetupStatus(teamId: TeamId | null): SetupSnapshot {
   const cursor = useQuery(
     api.cursorDb.status,
@@ -27,31 +26,22 @@ export function useSetupStatus(teamId: TeamId | null): SetupSnapshot {
     api.githubDb.status,
     teamId ? { teamId } : "skip",
   ) as { configured: boolean } | undefined;
-  const widget = useQuery(
-    api.teams.widgetStatus,
-    teamId ? { teamId } : "skip",
-  ) as { configured: boolean } | undefined;
 
   const loading =
-    !teamId ||
-    cursor === undefined ||
-    github === undefined ||
-    widget === undefined;
+    !teamId || cursor === undefined || github === undefined;
 
   const cursorOk = !!cursor?.configured;
   const githubOk = !!github?.configured;
-  const widgetOk = !!widget?.configured;
 
-  const done = Number(cursorOk) + Number(githubOk) + Number(widgetOk);
+  const done = Number(cursorOk) + Number(githubOk);
 
   return {
     loading,
     cursor: cursorOk,
     github: githubOk,
-    widget: widgetOk,
     done,
-    total: 3,
-    ready: done === 3,
+    total: 2,
+    ready: done === 2,
   };
 }
 
@@ -65,7 +55,6 @@ export function SetupBanner({
   if (status.loading || status.ready) return null;
   const remaining = status.total - status.done;
   const missing: string[] = [];
-  if (!status.widget) missing.push("widget");
   if (!status.cursor) missing.push("cursor key");
   if (!status.github) missing.push("github app");
 

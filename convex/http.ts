@@ -38,18 +38,19 @@ http.route({
       });
     }
 
-    // Resolve the owning team via per-team widget secret in settings.
+    // Resolve project (and therefore team) from the secret. Each
+    // project owns its own widget secret on the `projects` table.
     const match = await ctx.runQuery(
-      internal.ingest.findTeamByWidgetSecret,
+      internal.ingest.findProjectByWidgetSecret,
       { secret },
     );
-    const teamId = match?.teamId ?? null;
-    if (!teamId) {
+    if (!match) {
       return new Response("unauthorized", {
         status: 401,
         headers: widgetCorsHeaders,
       });
     }
+    const { teamId, projectId } = match;
 
     let body: any;
     try {
@@ -63,23 +64,6 @@ http.route({
 
     const sourceRef =
       typeof body?.url === "string" ? body.url : "widget:unknown";
-
-    // Optional `projectId` from the widget's `data-project` attribute.
-    // We validate ownership here so the parser can trust it later. If
-    // the projectId is malformed or belongs to a different team we
-    // silently drop it and fall back to URL-pattern routing.
-    let projectId: any = undefined;
-    if (typeof body?.projectId === "string" && body.projectId) {
-      try {
-        const owned = await ctx.runQuery(
-          internal.ingest.verifyProjectInTeam,
-          { teamId, projectId: body.projectId as any },
-        );
-        if (owned) projectId = body.projectId;
-      } catch {
-        // malformed id format — ignore
-      }
-    }
 
     const trackingId: string = await ctx.runMutation(
       internal.ingest.recordWidget,

@@ -96,9 +96,9 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-// Set up a team and a per-team widget secret for tests. Returns
-// (teamId, secret). Every fixture that touches admin-scoped tables
-// needs a teamId now that the platform is multi-tenant.
+// Set up a team and a default project that owns the widget secret
+// used by tests. Returns (teamId, projectId, secret). The widget
+// HTTP route resolves the owning project (and team) from the secret.
 async function setupTeam(t: any, secret = "widget-test-secret") {
   const teamId = await t.run(async (ctx: any) =>
     ctx.db.insert("teams", {
@@ -108,16 +108,19 @@ async function setupTeam(t: any, secret = "widget-test-secret") {
       createdBy: "test@otto.dev",
     }),
   );
-  await t.run(async (ctx: any) =>
-    ctx.db.insert("settings", {
-      key: "widget.secret",
-      value: secret,
+  const projectId = await t.run(async (ctx: any) =>
+    ctx.db.insert("projects", {
+      name: "Test project",
+      slug: "test",
+      widgetSecret: secret,
+      primaryRepoId: null,
+      enabled: true,
+      createdAt: Date.now(),
+      createdBy: "test@otto.dev",
       teamId,
-      updatedAt: Date.now(),
-      updatedBy: "test@otto.dev",
     }),
   );
-  return { teamId, secret };
+  return { teamId, projectId, secret };
 }
 
 async function insertRepo(

@@ -8,10 +8,6 @@ type StepStatus = "ready" | "needed" | "checking";
 
 export function OnboardingTab() {
   const { teamId } = useTeam();
-  const items = useQuery(
-    api.admin.recentItems,
-    teamId ? { teamId, limit: 50 } : "skip",
-  );
   const cursorStatus = useQuery(
     api.cursorDb.status,
     teamId ? { teamId } : "skip",
@@ -31,16 +27,6 @@ export function OnboardingTab() {
       }
     | undefined;
 
-  const widgetEvent = useMemo(
-    () => !!items?.some((i) => i.sourceType === "widget"),
-    [items],
-  );
-
-  const widgetStepStatus: StepStatus = widgetEvent
-    ? "ready"
-    : items === undefined
-      ? "checking"
-      : "needed";
   const cursorStepStatus: StepStatus =
     cursorStatus === undefined
       ? "checking"
@@ -53,11 +39,6 @@ export function OnboardingTab() {
       : githubStatus.configured
         ? "ready"
         : "needed";
-  const widgetSecret = useQuery(
-    api.teams.widgetSecret,
-    teamId ? { teamId } : "skip",
-  ) as string | null | undefined;
-  const rotateWidgetSecret = useMutation(api.teams.rotateWidgetSecret);
 
   return (
     <div className="onboarding">
@@ -65,11 +46,7 @@ export function OnboardingTab() {
         <OttoSprite
           size={72}
           state={
-            allReady(
-              widgetStepStatus,
-              cursorStepStatus,
-              githubStepStatus,
-            )
+            allReady(cursorStepStatus, githubStepStatus)
               ? "done"
               : "thinking"
           }
@@ -77,58 +54,20 @@ export function OnboardingTab() {
         <div>
           <h1>wake otto up</h1>
           <p className="onboarding-lede">
-            three required steps to ship a draft pr: drop the widget on
-            your app, add a cursor key, install the github app.
+            two required steps to ship a draft pr: add a cursor key,
+            install the github app. then create a project to grab the
+            widget snippet.
           </p>
         </div>
       </header>
 
       <ProgressStrip
-        widget={widgetStepStatus}
         cursor={cursorStepStatus}
         github={githubStepStatus}
       />
 
       <Step
         n={1}
-        glyph="inbox"
-        title="drop the widget"
-        status={widgetStepStatus}
-        verify="otto sees a widget event"
-        required="required"
-      >
-        <p>
-          otto&rsquo;s primary input. each project has its own snippet
-          (find it on the project page) — feedback from a project&rsquo;s
-          widget routes there directly. you only need to set the team
-          secret once, here.
-        </p>
-        <div className="row" style={{ gap: 8 }}>
-          <button
-            type="button"
-            onClick={() =>
-              teamId &&
-              void rotateWidgetSecret({ teamId })
-            }
-          >
-            {widgetSecret ? "rotate widget secret" : "create widget secret"}
-          </button>
-          {widgetSecret && (
-            <span className="muted" style={{ fontSize: 11 }}>
-              rotating invalidates pages still using the old secret
-            </span>
-          )}
-        </div>
-        <Hint>
-          go to <strong>projects → pick one → install the widget</strong>{" "}
-          to grab the per-project snippet. the team secret above is the
-          shared piece; the project id baked into each snippet tells
-          otto where the feedback belongs.
-        </Hint>
-      </Step>
-
-      <Step
-        n={2}
         glyph="task"
         title="add cursor api key"
         platform="cursor"
@@ -158,7 +97,7 @@ export function OnboardingTab() {
       </Step>
 
       <Step
-        n={3}
+        n={2}
         glyph="task"
         title="install github app"
         platform="github"
@@ -199,12 +138,10 @@ export function OnboardingTab() {
 /* ─────────────────── pieces ─────────────────── */
 
 function ProgressStrip(props: {
-  widget: StepStatus;
   cursor: StepStatus;
   github: StepStatus;
 }) {
   const cells = [
-    { name: "widget", status: props.widget },
     { name: "cursor", status: props.cursor },
     { name: "github", status: props.github },
   ];
@@ -307,14 +244,8 @@ function statusLabel(s: StepStatus): string {
   }
 }
 
-function allReady(
-  widget: StepStatus,
-  cursor: StepStatus,
-  github: StepStatus,
-): boolean {
-  return (
-    widget === "ready" && cursor === "ready" && github === "ready"
-  );
+function allReady(cursor: StepStatus, github: StepStatus): boolean {
+  return cursor === "ready" && github === "ready";
 }
 
 function CursorKeyForm({

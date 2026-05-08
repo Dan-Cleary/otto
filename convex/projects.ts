@@ -6,10 +6,13 @@ import {
 } from "./_generated/server";
 import { requireTeamAdmin, requireTeamMember } from "./auth";
 
-// Projects own URL patterns + a primary repo. They're how Otto routes
-// widget feedback (URL → project → repo) and meeting extractions
-// (semantic match on description → project → repo) without ever
-// asking the user to pick a repo.
+// Projects own a per-project widget secret + a primary repo. Widget
+// events identify their project from the secret; the parser routes
+// them to the project's primary repo without asking the user to pick.
+
+function newWidgetSecret(): string {
+  return `wk_${crypto.randomUUID().replace(/-/g, "")}`;
+}
 
 export const list = query({
   args: { teamId: v.id("teams") },
@@ -88,6 +91,7 @@ export const upsert = mutation({
     return ctx.db.insert("projects", {
       name,
       slug: cleanedSlug,
+      widgetSecret: newWidgetSecret(),
       primaryRepoId,
       autoFireThreshold,
       enabled,
@@ -95,6 +99,29 @@ export const upsert = mutation({
       createdBy: email,
       teamId,
     });
+  },
+});
+
+// Rotate a project's widget secret — invalidates any pages still
+// using the old one. Audit-logged so the team can trace rotations.
+export const rotateWidgetSecret = mutation({
+  args: { teamId: v.id("teams"), id: v.id("projects") },
+  handler: async (ctx, { teamId, id }) => {
+    const { email } = await requireTeamAdmin(ctx, teamId);
+    const proj = await ctx.db.get(id);
+    if (!proj || proj.teamId !== teamId)
+      throw new Error("project not in this team");
+    const next = newWidgetSecret();
+    await ctx.db.patch(id, { widgetSecret: next });
+    await ctx.db.insert("auditLog", {
+      itemId: null,
+      event: "project.widget.secret.rotated",
+      payload: { projectId: id },
+      actor: email,
+      at: Date.now(),
+      teamId,
+    });
+    return next;
   },
 });
 

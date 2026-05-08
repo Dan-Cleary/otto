@@ -29,11 +29,9 @@ const OTTER_ERROR = SVG_PREFIX + OTTER_ERROR_B64;
 (() => {
   const currentScript = document.currentScript as HTMLScriptElement | null;
   const ENDPOINT = currentScript?.dataset.endpoint;
+  // The secret is per-project; the server resolves the owning project
+  // and team from it. No `data-project` attribute is needed.
   const SECRET = currentScript?.dataset.secret;
-  // Optional. When set, every event from this page is tagged with the
-  // project id and routed there directly — bypassing URL-pattern
-  // matching. Per-project snippets are the recommended install path.
-  const PROJECT_ID = currentScript?.dataset.project ?? null;
   if (!ENDPOINT || !SECRET) {
     console.warn("[otto] missing data-endpoint or data-secret on script tag");
     return;
@@ -420,7 +418,6 @@ const OTTER_ERROR = SVG_PREFIX + OTTER_ERROR_B64;
             userAgent: navigator.userAgent,
             viewport: { w: innerWidth, h: innerHeight },
             at: Date.now(),
-            projectId: PROJECT_ID,
           }),
         });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
