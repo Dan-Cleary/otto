@@ -3,6 +3,9 @@ import { internal } from "./_generated/api";
 
 const crons = cronJobs();
 
+// Repo metadata + embeddings — used by the semantic router to pick
+// the right repo for an item when no project is matched on the
+// snippet. Daily is plenty; repos rarely change description.
 crons.daily(
   "reindex repos",
   { hourUTC: 8, minuteUTC: 0 },
@@ -10,25 +13,10 @@ crons.daily(
   {},
 );
 
-// Pull new Granola meeting notes off the REST API. Granola has no
-// webhook system, so this is the only ingest path. Three-minute
-// cadence comfortably fits Granola's rate budget (5 req/s sustained)
-// and keeps user-perceived latency under ~3 min after a meeting ends.
-crons.interval(
-  "poll granola",
-  { minutes: 3 },
-  internal.granola.pollAll,
-  {},
-);
-
-// Zoom polls every 5 min — recordings take a couple minutes to process
-// after a meeting ends, so a 5-min cadence keeps user-perceived latency
-// at "lunch break or less" without burning the rate budget.
-crons.interval(
-  "poll zoom",
-  { minutes: 5 },
-  internal.zoom.pollAll,
-  {},
-);
+// Meeting-source crons (granola pollAll, zoom pollAll) used to live
+// here. Removed alongside the widget-first pivot — meetings are
+// buried in the product. The granola/zoom backend code is still
+// present but not exercised by any cron, so existing teams that
+// installed the integrations stop pulling new data automatically.
 
 export default crons;
