@@ -447,8 +447,6 @@ function CreateProjectModal({
         teamId,
         name: name.trim(),
         slug: name.trim().toLowerCase().replace(/[^a-z0-9-]+/g, "-"),
-        description: "",
-        urlPatterns: [],
         primaryRepoId: null,
         enabled: true,
       });
@@ -551,11 +549,6 @@ function ProjectEditForm({
       name: draft.name,
       // Slug auto-derives; users never see or set it themselves.
       slug: draft.name.toLowerCase().replace(/[^a-z0-9-]+/g, "-"),
-      // Description, urlPatterns: kept on the model for backward compat
-      // with existing projects but no longer surfaced in the UI. We
-      // preserve any existing values rather than blowing them away.
-      description: existing.description,
-      urlPatterns: existing.urlPatterns,
       primaryRepoId: draft.primaryRepoId
         ? (draft.primaryRepoId as Id<"repos">)
         : null,

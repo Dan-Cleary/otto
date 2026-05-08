@@ -1,7 +1,6 @@
 import { internalQuery, internalMutation } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { v } from "convex/values";
-import { resolveProjectFromUrl } from "./projects";
 
 export const getIngestEvent = internalQuery({
   args: { id: v.id("ingestEvents") },
@@ -18,7 +17,6 @@ export const persistItems = internalMutation({
       v.literal("zoom"),
     ),
     sourceRef: v.string(),
-    widgetUrl: v.union(v.string(), v.null()),
     items: v.array(
       v.object({
         description: v.string(),
@@ -31,15 +29,16 @@ export const persistItems = internalMutation({
   },
   handler: async (
     ctx,
-    { ingestEventId, teamId, sourceType, sourceRef, widgetUrl, items },
+    { ingestEventId, teamId, sourceType, sourceRef, items },
   ) => {
     let project: { projectId: any; primaryRepoId: any } | null = null;
-    let routedBy: "snippet" | "url-pattern" | "router" = "router";
+    let routedBy: "snippet" | "router" = "router";
 
     if (sourceType === "widget") {
-      // Prefer the `data-project` declared on the widget snippet — it's
-      // already team-validated at the HTTP route. Fall back to URL
-      // pattern matching only when the snippet didn't declare one.
+      // Widget events always carry a `data-project` (team-validated at
+      // the HTTP route). If the snippet was misconfigured or the
+      // project was deleted, the event lands without one and falls
+      // through to the semantic router.
       const ev = await ctx.db.get(ingestEventId);
       if (ev?.projectId) {
         const p = await ctx.db.get(ev.projectId);
@@ -47,10 +46,6 @@ export const persistItems = internalMutation({
           project = { projectId: p._id, primaryRepoId: p.primaryRepoId };
           routedBy = "snippet";
         }
-      }
-      if (!project && widgetUrl) {
-        project = await resolveProjectFromUrl(ctx, teamId, widgetUrl);
-        if (project) routedBy = "url-pattern";
       }
     }
 

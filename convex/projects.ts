@@ -51,25 +51,13 @@ export const upsert = mutation({
     id: v.optional(v.id("projects")),
     name: v.string(),
     slug: v.string(),
-    description: v.string(),
-    urlPatterns: v.array(v.string()),
     primaryRepoId: v.union(v.id("repos"), v.null()),
     autoFireThreshold: v.optional(v.number()),
     enabled: v.boolean(),
   },
   handler: async (
     ctx,
-    {
-      teamId,
-      id,
-      name,
-      slug,
-      description,
-      urlPatterns,
-      primaryRepoId,
-      autoFireThreshold,
-      enabled,
-    },
+    { teamId, id, name, slug, primaryRepoId, autoFireThreshold, enabled },
   ) => {
     const { email } = await requireTeamAdmin(ctx, teamId);
     const cleanedSlug = slug.toLowerCase().replace(/[^a-z0-9-]+/g, "-");
@@ -81,8 +69,6 @@ export const upsert = mutation({
       await ctx.db.patch(id, {
         name,
         slug: cleanedSlug,
-        description,
-        urlPatterns,
         primaryRepoId,
         autoFireThreshold,
         enabled,
@@ -102,8 +88,6 @@ export const upsert = mutation({
     return ctx.db.insert("projects", {
       name,
       slug: cleanedSlug,
-      description,
-      urlPatterns,
       primaryRepoId,
       autoFireThreshold,
       enabled,
@@ -153,76 +137,9 @@ export const setRepoProject = mutation({
   },
 });
 
-// Exported helper used by parserDb to resolve URL → project synchronously
-// inside a mutation. Scoped by teamId so cross-team data never leaks.
-export async function resolveProjectFromUrl(
-  ctx: { db: any },
-  teamId: any,
-  url: string,
-): Promise<{ projectId: any; primaryRepoId: any } | null> {
-  const projects = await ctx.db
-    .query("projects")
-    .withIndex("by_team", (q: any) => q.eq("teamId", teamId))
-    .filter((q: any) => q.eq(q.field("enabled"), true))
-    .collect();
-  for (const p of projects) {
-    for (const pat of p.urlPatterns) {
-      if (matchUrl(url, pat)) {
-        return { projectId: p._id, primaryRepoId: p.primaryRepoId };
-      }
-    }
-  }
-  return null;
-}
-
-// ── URL matching ───────────────────────────────────────────────
-//
-// Patterns: "host", "host/path", "host/path*", "*.host.com/path".
-// Trailing /* matches any sub-path. Hostname is matched case-insensitive.
-//
-// We deliberately keep the syntax tiny — full regex would be a footgun
-// in admin UIs. If a project legitimately needs richer matching,
-// they can register multiple patterns.
-export function matchUrl(url: string, pattern: string): boolean {
-  let parsed: URL;
-  try {
-    parsed = new URL(url);
-  } catch {
-    return false;
-  }
-  const host = parsed.host.toLowerCase();
-  const path = parsed.pathname;
-
-  const slashAt = pattern.indexOf("/");
-  const patHost = (slashAt === -1 ? pattern : pattern.slice(0, slashAt))
-    .trim()
-    .toLowerCase();
-  const patPath = slashAt === -1 ? "" : pattern.slice(slashAt);
-
-  if (!globMatch(host, patHost)) return false;
-  if (!patPath) return true;
-  return globMatch(path, patPath) || path.startsWith(stripTrailingStar(patPath));
-}
-
-function globMatch(s: string, glob: string): boolean {
-  if (!glob) return s === "";
-  if (glob === "*") return true;
-  const re = new RegExp(
-    "^" + glob.split("*").map(escapeRegex).join(".*") + "$",
-  );
-  return re.test(s);
-}
-
-function escapeRegex(s: string): string {
-  return s.replace(/[.+?^${}()|[\]\\]/g, "\\$&");
-}
-
-function stripTrailingStar(p: string): string {
-  return p.replace(/\*+$/, "");
-}
-
 // Internal mutation used by parserDb to attach a project to an item
-// (used by Granola path eventually; widget path resolves earlier).
+// (legacy: used by Granola path; widget path always resolves at ingest
+// via the snippet's data-project attribute).
 export const attachProject = internalMutation({
   args: {
     itemId: v.id("items"),

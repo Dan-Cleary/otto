@@ -169,17 +169,12 @@ export default defineSchema({
       filterFields: ["enabled", "teamId"],
     }),
 
-  // Projects group one or more repos and own the routing rules for
-  // them. Widget feedback routes to a project via URL pattern; Granola
-  // extractions route via semantic match on the project description.
+  // Projects group one or more repos. Widget feedback routes to a
+  // project via the snippet's `data-project="<id>"` attribute, which
+  // is validated team-side at the HTTP ingest route.
   projects: defineTable({
     name: v.string(),
     slug: v.string(),
-    description: v.string(),
-    // URL patterns that identify this project's host pages. Each is a
-    // simple "host" / "host/path" / "*.host.com/path*" glob — see
-    // projects.matchUrl on the server. First match wins.
-    urlPatterns: v.array(v.string()),
     primaryRepoId: v.union(v.id("repos"), v.null()),
     autoFireThreshold: v.optional(v.number()),
     enabled: v.boolean(),

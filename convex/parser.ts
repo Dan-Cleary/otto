@@ -101,10 +101,6 @@ export const parse = internalAction({
       teamId: event.teamId,
       sourceType: event.sourceType,
       sourceRef: event.sourceRef,
-      widgetUrl:
-        event.sourceType === "widget" && typeof event.payload?.url === "string"
-          ? event.payload.url
-          : null,
       items: parsed.items ?? [],
     });
   },
