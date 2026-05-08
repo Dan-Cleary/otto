@@ -26,6 +26,16 @@ export const getFireContext = internalQuery({
   },
 });
 
+// Used by the poll handler to mint a github installation token for
+// PR verification (see cursor.ts:verifyDraft).
+export const getItemTeam = internalQuery({
+  args: { itemId: v.id("items") },
+  handler: async (ctx, { itemId }) => {
+    const item = await ctx.db.get(itemId);
+    return item?.teamId ?? null;
+  },
+});
+
 // ── Public API for the per-team Cursor API key ──────────────────
 
 export const status = query({

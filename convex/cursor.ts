@@ -132,7 +132,18 @@ export const poll = internalAction({
     }
 
     // Trust contract: verify the PR is actually a draft. Fail closed otherwise.
-    const isDraft = await verifyDraft(prUrl);
+    // Prefer a github-app installation token (per-team, scoped to the
+    // repos the team installed on); fall back to the env PAT when no
+    // installation is on file (legacy / CI / the "first run" case).
+    const teamId = await ctx.runQuery(internal.cursorDb.getItemTeam, { itemId });
+    let token: string | null = null;
+    if (teamId) {
+      const t = await ctx.runAction(internal.github.getInstallToken, { teamId });
+      if ("value" in t) token = t.value;
+    }
+    if (!token) token = process.env.GITHUB_TOKEN ?? null;
+
+    const isDraft = await verifyDraft(prUrl, token);
     if (!isDraft) {
       const reason = `non-draft PR opened: ${prUrl}`;
       await ctx.runMutation(internal.cursorDb.markFailed, { itemId, reason });
@@ -151,12 +162,14 @@ export const poll = internalAction({
   },
 });
 
-async function verifyDraft(prUrl: string): Promise<boolean> {
+async function verifyDraft(
+  prUrl: string,
+  token: string | null,
+): Promise<boolean> {
   // Expect prUrl like https://github.com/OWNER/REPO/pull/NUMBER
   const m = prUrl.match(/github\.com\/([^/]+)\/([^/]+)\/pull\/(\d+)/);
   if (!m) return false;
   const [, owner, repo, number] = m;
-  const token = process.env.GITHUB_TOKEN;
   if (!token) {
     // Without a token we cannot verify — fail closed.
     return false;

@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../convexApi";
 import { useTeam } from "../teamContext";
-import { OttoHero, StatCard } from "../Otto";
+import { OttoHero } from "../Otto";
 import type { Doc, Id } from "../../../convex/_generated/dataModel";
 
 // projects.list returns the stored project shape plus two joined fields
@@ -71,44 +71,10 @@ function ProjectsGrid({
   items: Item[] | undefined;
   onOpen: (id: Id<"projects">) => void;
 }) {
-  const stats = useMemo(() => (items ? computeStats(items) : null), [items]);
   const [creating, setCreating] = useState(false);
 
   return (
     <>
-      {stats && (
-        <div className="stat-grid">
-          <StatCard
-            label={
-              <>
-                ITEMS <span className="sep">//</span> ALL TIME
-              </>
-            }
-            value={stats.total}
-            caption={`${stats.last7d} in the last 7 days`}
-          />
-          <StatCard
-            label={
-              <>
-                PRS DRAFTED <span className="sep">//</span> ALL TIME
-              </>
-            }
-            value={stats.prsOpened}
-            caption={`${stats.prsLast7d} in the last 7 days`}
-            accent
-          />
-          <StatCard
-            label={
-              <>
-                AWAITING <span className="sep">//</span> SLACK QUEUE
-              </>
-            }
-            value={stats.queued}
-            caption={stats.queued === 0 ? "all clear" : "needs review"}
-          />
-        </div>
-      )}
-
       <div
         className="row"
         style={{ justifyContent: "space-between", alignItems: "baseline" }}
@@ -166,9 +132,6 @@ function ProjectCard({
   loading: boolean;
   onClick: () => void;
 }) {
-  const sevenDays = 7 * 24 * 60 * 60 * 1000;
-  const recent = items.filter((i) => Date.now() - i.createdAt < sevenDays);
-  const drafts = items.filter((i) => i.status === "pr_opened").length;
   const installed = items.length > 0 || loading;
 
   return (
@@ -178,7 +141,7 @@ function ProjectCard({
         style={{
           justifyContent: "space-between",
           alignItems: "baseline",
-          marginBottom: 8,
+          marginBottom: 6,
         }}
       >
         <h3 style={{ margin: 0, fontSize: 16 }}>{project.name}</h3>
@@ -196,14 +159,7 @@ function ProjectCard({
           </span>
         )}
       </div>
-      <div
-        className="muted"
-        style={{
-          fontSize: 11,
-          marginBottom: 12,
-          minHeight: 14,
-        }}
-      >
+      <div className="muted" style={{ fontSize: 11 }}>
         {project.primaryRepoName ? (
           <span style={{ fontFamily: "var(--otto-font-mono)" }}>
             → {project.primaryRepoName}
@@ -211,20 +167,6 @@ function ProjectCard({
         ) : (
           <span className="subtle">no repo connected</span>
         )}
-      </div>
-      <div className="row" style={{ gap: 18, fontSize: 12 }}>
-        <span>
-          <strong>{items.length}</strong>{" "}
-          <span className="muted">items</span>
-        </span>
-        <span>
-          <strong>{recent.length}</strong>{" "}
-          <span className="muted">7d</span>
-        </span>
-        <span>
-          <strong>{drafts}</strong>{" "}
-          <span className="muted">drafts</span>
-        </span>
       </div>
     </button>
   );
@@ -759,19 +701,6 @@ function ProjectEditForm({
 }
 
 /* ─────────────────────── helpers ─────────────────────── */
-
-function computeStats(items: { createdAt: number; status: string }[]) {
-  const now = Date.now();
-  const sevenDays = 7 * 24 * 60 * 60 * 1000;
-  const recent = items.filter((i) => now - i.createdAt < sevenDays);
-  return {
-    total: items.length,
-    last7d: recent.length,
-    prsOpened: items.filter((i) => i.status === "pr_opened").length,
-    prsLast7d: recent.filter((i) => i.status === "pr_opened").length,
-    queued: items.filter((i) => i.status === "queued").length,
-  };
-}
 
 function statusLabel(status: string): string {
   switch (status) {

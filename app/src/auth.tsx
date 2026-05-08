@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { Authenticated, Unauthenticated, AuthLoading } from "convex/react";
 import { OttoHero, OttoSprite } from "./Otto";
@@ -16,9 +16,26 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
       <Unauthenticated>
         <SignInScreen />
       </Unauthenticated>
-      <Authenticated>{children}</Authenticated>
+      <Authenticated>
+        <PostAuthRedirect />
+        {children}
+      </Authenticated>
     </>
   );
+}
+
+// If a signed-in user is sitting on /login or /signup (because the
+// vite MPA setup mounts the same React app on every entry), bounce
+// them to /dashboard/ so the URL matches what they're seeing.
+function PostAuthRedirect() {
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const path = window.location.pathname;
+    if (path.startsWith("/login") || path.startsWith("/signup")) {
+      window.history.replaceState(null, "", "/dashboard/");
+    }
+  }, []);
+  return null;
 }
 
 export function SignOutButton() {
