@@ -142,6 +142,49 @@ const OTTER_ERROR = SVG_PREFIX + OTTER_ERROR_B64;
 
 .otto-fab-text { letter-spacing: .04em; padding-top: 3px; }
 
+/* Listening mode — pulsing pixel REC dot + caption next to the FAB.
+ * The dot sits inside the FAB so the click target stays the same.
+ * Caption floats above and to the left of the FAB when active. */
+.otto-fab.is-listening { background: ${CREAM}; }
+.otto-rec-dot {
+  display: none;
+  width: 8px; height: 8px;
+  background: ${RED};
+  margin-left: 2px;
+  flex-shrink: 0;
+  animation: otto-rec-blink 1s steps(2, end) infinite;
+  /* Hard pixel edges — no rounding. */
+  image-rendering: pixelated;
+}
+.otto-fab.is-listening .otto-rec-dot { display: inline-block; }
+.otto-listen-hint {
+  position: fixed;
+  bottom: 78px; right: 20px;
+  z-index: 2147483646;
+  background: ${INK};
+  color: ${CREAM};
+  border: 2px solid ${INK};
+  padding: 6px 10px 5px;
+  font-family: ${FONT_MONO};
+  font-size: 10px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  display: flex; align-items: center; gap: 6px;
+  pointer-events: none;
+  /* Pixel-poke down-right — speech bubble pointer toward the FAB. */
+  box-shadow: 4px 4px 0 ${HAIR};
+}
+.otto-listen-hint .rec {
+  width: 6px; height: 6px;
+  background: ${RED};
+  display: inline-block;
+  animation: otto-rec-blink 1s steps(2, end) infinite;
+}
+@keyframes otto-rec-blink {
+  0%, 49%   { opacity: 1; }
+  50%, 100% { opacity: .15; }
+}
+
 /* 12-second loop. Glance right around 4s, glance left around 8s. */
 @keyframes otto-look {
   0%, 28%    { transform: translateX(0); }
@@ -323,9 +366,52 @@ const OTTER_ERROR = SVG_PREFIX + OTTER_ERROR_B64;
       <span class="otto-pupil r"></span>
     </span>
     <span class="otto-fab-text">otto</span>
+    <span class="otto-rec-dot" aria-hidden="true"></span>
   `;
-  fab.onclick = openModal;
+  fab.onclick = onFabClick;
   document.body.appendChild(fab);
+
+  // ── Listening state ─────────────────────────────────────────────
+  // Click otto: start listening (no modal — user keeps using the
+  // page). Click again: stop and open the review modal. ESC cancels
+  // listening without opening the modal.
+  let isListening = false;
+  let listenHint: HTMLDivElement | null = null;
+
+  function startListening() {
+    if (isListening) return;
+    isListening = true;
+    fab.classList.add("is-listening");
+    listenHint = document.createElement("div");
+    listenHint.className = "otto-listen-hint";
+    listenHint.innerHTML = `<span class="rec"></span>recording · click otto to stop`;
+    document.body.appendChild(listenHint);
+    document.addEventListener("keydown", onListenKey);
+  }
+
+  function stopListening(open: boolean) {
+    if (!isListening) return;
+    isListening = false;
+    fab.classList.remove("is-listening");
+    if (listenHint) {
+      listenHint.remove();
+      listenHint = null;
+    }
+    document.removeEventListener("keydown", onListenKey);
+    if (open) openModal();
+  }
+
+  function onListenKey(e: KeyboardEvent) {
+    if (e.key === "Escape") stopListening(false);
+  }
+
+  function onFabClick() {
+    if (isListening) {
+      stopListening(true);
+    } else {
+      startListening();
+    }
+  }
 
   function setFabState(state: "idle" | "thinking" | "done" | "error") {
     const img = fab.querySelector("[data-otto-sprite]") as HTMLImageElement | null;
@@ -350,14 +436,14 @@ const OTTER_ERROR = SVG_PREFIX + OTTER_ERROR_B64;
         <header class="otto-modal-head">
           <span class="left">
             <img src="${OTTER_IDLE}" alt="" data-otto-modal-sprite />
-            <h3 id="otto-title">tell otto</h3>
+            <h3 id="otto-title">review &amp; send</h3>
           </span>
-          <span class="state" data-otto-state>&gt; idle</span>
+          <span class="state" data-otto-state>&gt; ready</span>
         </header>
         <div class="otto-modal-body">
-          <p class="otto-modal-sub">otto drafts a pr from this. you review and merge — never auto-merge. otto figures out which repo from the page you&rsquo;re on.</p>
-          <label for="otto-desc">what should change?</label>
-          <textarea id="otto-desc" placeholder="the export button on this page fires even with zero rows selected."></textarea>
+          <p class="otto-modal-sub">otto drafts a pr from this. you review and merge — never auto-merge.</p>
+          <label for="otto-desc">what&rsquo;s wrong?</label>
+          <textarea id="otto-desc" placeholder="describe what went wrong — voice transcription is coming next."></textarea>
           <div class="otto-row">
             <button class="otto-cancel" type="button">cancel</button>
             <button class="otto-submit" type="button" disabled>send to otto</button>
