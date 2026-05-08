@@ -43,3 +43,31 @@ jobs:
 
       - name: tests
         run: npm test
+
+  deploy-convex-prod:
+    # Deploys convex functions to the prod deployment whenever main moves.
+    # Vercel auto-deploys the frontend on the same trigger; this keeps the
+    # backend in lockstep so new queries/mutations are live before the
+    # frontend that calls them. Needs CONVEX_DEPLOY_KEY (prod deploy key
+    # from https://dashboard.convex.dev/d/resolute-lemming-209/settings).
+    needs: typecheck-and-test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            app/package-lock.json
+
+      - name: install root deps
+        run: npm ci --no-audit --no-fund
+
+      - name: deploy convex (prod)
+        env:
+          CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
+        run: npx convex deploy
