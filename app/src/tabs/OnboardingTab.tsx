@@ -156,9 +156,9 @@ export function OnboardingTab() {
         <div>
           <h1>wake otto up</h1>
           <p className="onboarding-lede">
-            four required steps to ship a draft pr: a cursor key, the
-            github app, one meeting source, and at least one registered
-            repo. the rest is optional.
+            three required steps to ship a draft pr: drop the widget in
+            your app, add a cursor key, install the github app. meeting
+            sources are optional add-ons.
           </p>
         </div>
       </header>
@@ -178,9 +178,11 @@ export function OnboardingTab() {
         verify="otto sees a widget event"
       >
         <p>
-          build the bundle with <code>npm run widget:build</code>, host{" "}
-          <code>widget/dist/otto.js</code> on any static host, then paste this
-          onto the page you want to collect feedback from.
+          otto&rsquo;s primary input. build the bundle with{" "}
+          <code>npm run widget:build</code>, host{" "}
+          <code>widget/dist/otto.js</code> on any static host, then paste
+          this onto the qa or prod build of your app — your team uses it
+          to flag bugs and feedback.
         </p>
         <CodeBlock language="html" code={widgetSnippet} />
         <div className="row" style={{ gap: 8 }}>
@@ -216,8 +218,9 @@ export function OnboardingTab() {
         verify={granolaVerifyLine(granolaStatus)}
       >
         <p>
-          paste a granola personal api key. otto polls every 3 minutes
-          and validates the key live before saving.
+          optional additional source. paste a granola personal api key
+          and otto will poll every 3 minutes for new meeting notes,
+          validating the key live before saving.
         </p>
         <GranolaKeyForm
           configured={!!granolaStatus?.apiKeyConfigured}
@@ -239,9 +242,9 @@ export function OnboardingTab() {
         verify={zoomVerifyLine(zoomStatus)}
       >
         <p>
-          otto pulls cloud-recording transcripts from zoom on a 5-minute
-          cron — never joins your meetings. one click to authorize; otto
-          handles the credentials.
+          optional additional source. otto pulls cloud-recording
+          transcripts from zoom on a 5-minute cron — never joins your
+          meetings. one click to authorize.
         </p>
         <ZoomConnect status={zoomStatus} teamId={teamId} />
       </Step>
