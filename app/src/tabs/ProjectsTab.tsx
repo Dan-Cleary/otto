@@ -200,12 +200,18 @@ function ProjectDetail({
   ) as { configured: boolean } | undefined;
 
   // Per-project widget snippet: the project's own secret tells the
-  // server which project (and team) the event belongs to.
+  // server which project (and team) the event belongs to. We point
+  // `src` at this same origin so a fresh user can paste the snippet
+  // verbatim without having to host otto.js themselves.
   const convexUrl = (import.meta.env.VITE_CONVEX_URL as string | undefined) ?? "";
   const siteUrl = convexUrl.replace(".convex.cloud", ".convex.site");
+  const widgetSrc =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/otto.js`
+      : "https://ottoagent.app/otto.js";
   const widgetSecret = project.widgetSecret;
   const snippet = `<script
-  src="https://YOUR-STATIC-HOST/otto.js"
+  src="${widgetSrc}"
   data-endpoint="${siteUrl || "https://YOUR-CONVEX.convex.site"}/ingest/widget"
   data-secret="${widgetSecret ?? "<rotate to generate a secret>"}"
   defer
@@ -360,6 +366,11 @@ function ProjectGettingStarted({
   onRotate: () => void;
   onEditProject: () => void;
 }) {
+  const goToSettings = () =>
+    window.dispatchEvent(
+      new CustomEvent("otto:go-to-tab", { detail: "settings" }),
+    );
+
   const items: { label: string; done: boolean; action?: React.ReactNode }[] = [
     {
       label: "connect a repo to this project",
@@ -372,18 +383,14 @@ function ProjectGettingStarted({
       label: "add a cursor api key",
       done: !missingCursor,
       action: missingCursor && (
-        <a href="#" onClick={(e) => e.preventDefault()} style={{ fontSize: 12 }}>
-          go to settings →
-        </a>
+        <button onClick={goToSettings}>go to settings →</button>
       ),
     },
     {
       label: "install the github app",
       done: !missingGithub,
       action: missingGithub && (
-        <a href="#" onClick={(e) => e.preventDefault()} style={{ fontSize: 12 }}>
-          go to settings →
-        </a>
+        <button onClick={goToSettings}>go to settings →</button>
       ),
     },
   ];

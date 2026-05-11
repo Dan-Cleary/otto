@@ -37,6 +37,18 @@ function Inner() {
     }
   }, [tab]);
 
+  // Cross-component tab navigation. Child views (e.g., the project
+  // getting-started checklist) dispatch `otto:go-to-tab` to jump the
+  // user to a different top-level tab without prop drilling.
+  useEffect(() => {
+    function onGoTo(e: Event) {
+      const detail = (e as CustomEvent<string>).detail;
+      if (typeof detail === "string" && isTabId(detail)) setTab(detail);
+    }
+    window.addEventListener("otto:go-to-tab", onGoTo);
+    return () => window.removeEventListener("otto:go-to-tab", onGoTo);
+  }, []);
+
   return (
     <div className="shell">
       <header className="topbar">
