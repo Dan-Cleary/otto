@@ -185,6 +185,37 @@ const OTTER_ERROR = SVG_PREFIX + OTTER_ERROR_B64;
   50%, 100% { opacity: .15; }
 }
 
+/* Live transcript bubble — pixel speech bubble that grows above the
+ * caption while otto is listening. Final words in ink, in-flight
+ * (interim) words in pencil so the user can see the recognizer
+ * settling in real time. */
+.otto-bubble {
+  position: fixed;
+  bottom: 110px; right: 20px;
+  z-index: 2147483646;
+  background: ${CREAM};
+  color: ${INK};
+  border: 2px solid ${INK};
+  padding: 8px 12px;
+  font-family: ${FONT_MONO};
+  font-size: 12px;
+  line-height: 1.45;
+  max-width: 320px;
+  min-width: 180px;
+  min-height: 34px;
+  display: none;
+  box-shadow: 4px 4px 0 ${HAIR};
+  white-space: pre-wrap;
+  word-break: break-word;
+  pointer-events: none;
+}
+.otto-bubble.is-active { display: block; }
+.otto-bubble .interim { color: ${PENCIL}; }
+.otto-bubble .empty {
+  color: ${PENCIL};
+  font-style: italic;
+}
+
 /* 12-second loop. Glance right around 4s, glance left around 8s. */
 @keyframes otto-look {
   0%, 28%    { transform: translateX(0); }
@@ -375,17 +406,85 @@ const OTTER_ERROR = SVG_PREFIX + OTTER_ERROR_B64;
   // Click otto: start listening (no modal — user keeps using the
   // page). Click again: stop and open the review modal. ESC cancels
   // listening without opening the modal.
+  //
+  // While listening, the browser's SpeechRecognition (Chrome/Safari/
+  // Edge) transcribes audio in real time. The transcript pre-fills
+  // the review modal's textarea on stop. Browsers without Web Speech
+  // (Firefox) skip the bubble and fall back to typed-only review.
   let isListening = false;
   let listenHint: HTMLDivElement | null = null;
+  let bubble: HTMLDivElement | null = null;
+  let recognition: any = null;
+  let finalTranscript = "";
+  let interimTranscript = "";
+
+  const SpeechRecognitionCtor: any =
+    (window as any).SpeechRecognition ||
+    (window as any).webkitSpeechRecognition ||
+    null;
+
+  function paintBubble() {
+    if (!bubble) return;
+    if (!finalTranscript && !interimTranscript) {
+      bubble.innerHTML = `<span class="empty">listening…</span>`;
+      return;
+    }
+    const finalEsc = escapeHtml(finalTranscript);
+    const interimEsc = escapeHtml(interimTranscript);
+    bubble.innerHTML =
+      finalEsc + (interimEsc ? `<span class="interim">${interimEsc}</span>` : "");
+  }
 
   function startListening() {
     if (isListening) return;
     isListening = true;
     fab.classList.add("is-listening");
+
     listenHint = document.createElement("div");
     listenHint.className = "otto-listen-hint";
     listenHint.innerHTML = `<span class="rec"></span>recording · click otto to stop`;
     document.body.appendChild(listenHint);
+
+    finalTranscript = "";
+    interimTranscript = "";
+
+    if (SpeechRecognitionCtor) {
+      bubble = document.createElement("div");
+      bubble.className = "otto-bubble is-active";
+      document.body.appendChild(bubble);
+      paintBubble();
+
+      try {
+        recognition = new SpeechRecognitionCtor();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.lang = navigator.language || "en-US";
+        recognition.onresult = (event: any) => {
+          let final = "";
+          let interim = "";
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            const r = event.results[i];
+            if (r.isFinal) final += r[0].transcript;
+            else interim += r[0].transcript;
+          }
+          if (final) finalTranscript += final;
+          interimTranscript = interim;
+          paintBubble();
+        };
+        recognition.onerror = (e: any) => {
+          // Common: 'not-allowed' (mic denied), 'no-speech' (silence).
+          // Silent failure — user falls back to typed input in the modal.
+          if (e?.error === "not-allowed" && bubble) {
+            bubble.innerHTML = `<span class="empty">mic blocked — type your note after stopping</span>`;
+          }
+        };
+        recognition.start();
+      } catch {
+        // Construction failed — degrade to typed-only.
+        recognition = null;
+      }
+    }
+
     document.addEventListener("keydown", onListenKey);
   }
 
@@ -393,12 +492,29 @@ const OTTER_ERROR = SVG_PREFIX + OTTER_ERROR_B64;
     if (!isListening) return;
     isListening = false;
     fab.classList.remove("is-listening");
+
+    if (recognition) {
+      try {
+        recognition.stop();
+      } catch {
+        /* recognition already stopped */
+      }
+      recognition = null;
+    }
+
+    const captured = (finalTranscript + interimTranscript).trim();
+
     if (listenHint) {
       listenHint.remove();
       listenHint = null;
     }
+    if (bubble) {
+      bubble.remove();
+      bubble = null;
+    }
     document.removeEventListener("keydown", onListenKey);
-    if (open) openModal();
+
+    if (open) openModal(captured);
   }
 
   function onListenKey(e: KeyboardEvent) {
@@ -428,7 +544,7 @@ const OTTER_ERROR = SVG_PREFIX + OTTER_ERROR_B64;
   };
 
   // ── Modal ───────────────────────────────────────────────────────
-  function openModal() {
+  function openModal(prefill = "") {
     const overlay = document.createElement("div");
     overlay.className = "otto-overlay";
     overlay.innerHTML = `
@@ -443,7 +559,7 @@ const OTTER_ERROR = SVG_PREFIX + OTTER_ERROR_B64;
         <div class="otto-modal-body">
           <p class="otto-modal-sub">otto drafts a pr from this. you review and merge — never auto-merge.</p>
           <label for="otto-desc">what&rsquo;s wrong?</label>
-          <textarea id="otto-desc" placeholder="describe what went wrong — voice transcription is coming next."></textarea>
+          <textarea id="otto-desc" placeholder="describe what went wrong, or click otto and speak"></textarea>
           <div class="otto-row">
             <button class="otto-cancel" type="button">cancel</button>
             <button class="otto-submit" type="button" disabled>send to otto</button>
@@ -472,7 +588,19 @@ const OTTER_ERROR = SVG_PREFIX + OTTER_ERROR_B64;
     textarea.addEventListener("input", () => {
       submitBtn.disabled = !textarea.value.trim();
     });
-    textarea.focus();
+
+    // If a voice transcript was captured, pre-fill so the user only
+    // needs to edit + send. Otherwise focus the empty textarea for
+    // typing.
+    if (prefill) {
+      textarea.value = prefill;
+      submitBtn.disabled = false;
+      textarea.focus();
+      // Place caret at end so additions feel natural.
+      textarea.selectionStart = textarea.selectionEnd = prefill.length;
+    } else {
+      textarea.focus();
+    }
 
     const setModalState = (s: "idle" | "thinking" | "done" | "error") => {
       modalSprite.src = SPRITE[s];
