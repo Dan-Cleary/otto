@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>install otto — drop the widget on your app</title>
+  <meta name="description" content="Two steps to install Otto: create a project, paste the snippet onto your QA or prod build. Otto routes feedback to a draft PR on the right repo." />
+  <link rel="canonical" href="https://ottoagent.app/docs/install" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="/app-icon.png" />
+  <meta name="theme-color" content="#ece4d3" />
+  <meta property="og:title" content="install otto — drop the widget on your app" />
+  <meta property="og:description" content="Two steps: create a project, paste the snippet. Feedback routes to a draft PR." />
+  <meta property="og:image" content="https://ottoagent.app/og.png" />
+  <meta property="og:url" content="https://ottoagent.app/docs/install" />
+  <meta property="og:type" content="article" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=VT323&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    :root {
+      --bg:        #ece4d3;
+      --cream:     #f6efde;
+      --amber:     #c89045;
+      --amber-dim: #a87528;
+      --hair:      #b8ad94;
+      --ink:       #1c1a16;
+      --pencil:    #6b6356;
+      --display:   "VT323", ui-monospace, monospace;
+      --mono:      "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+      --eyebrow:   0.08em;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font: 14px/1.65 var(--mono);
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--ink); text-decoration: underline; text-underline-offset: 2px; }
+    a:hover { color: var(--amber-dim); }
+
+    .nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 28px;
+      border-bottom: 1px solid var(--hair);
+    }
+    .lockup { display: inline-flex; align-items: center; gap: 10px; }
+    .lockup img { width: 32px; height: 32px; image-rendering: pixelated; }
+    .lockup .name {
+      font-family: var(--display);
+      font-size: 26px;
+      letter-spacing: -0.01em;
+    }
+    .nav-links {
+      display: flex; gap: 22px;
+      font-size: 12px; letter-spacing: var(--eyebrow);
+      text-transform: uppercase;
+    }
+    .nav-links a { text-decoration: none; color: var(--pencil); }
+    .nav-links a:hover, .nav-links a.active { color: var(--ink); }
+
+    main {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 28px 96px;
+    }
+    h1 {
+      font-family: var(--display);
+      font-weight: 400;
+      font-size: 56px;
+      line-height: 1;
+      margin: 0 0 16px;
+      letter-spacing: -0.01em;
+    }
+    h2 {
+      font-family: var(--display);
+      font-weight: 400;
+      font-size: 32px;
+      line-height: 1.1;
+      margin: 48px 0 12px;
+      letter-spacing: -0.01em;
+    }
+    h3 {
+      font-family: var(--mono);
+      font-weight: 600;
+      font-size: 13px;
+      letter-spacing: var(--eyebrow);
+      text-transform: uppercase;
+      margin: 28px 0 8px;
+      color: var(--pencil);
+    }
+    p { margin: 0 0 16px; }
+    .lede {
+      font-size: 16px;
+      line-height: 1.55;
+      color: var(--pencil);
+      margin-bottom: 32px;
+    }
+    code {
+      font-family: var(--mono);
+      font-size: 12px;
+      background: var(--cream);
+      border: 1px solid var(--hair);
+      padding: 1px 5px;
+    }
+    pre {
+      background: var(--cream);
+      border: 1px solid var(--hair);
+      padding: 16px 18px;
+      overflow-x: auto;
+      font-family: var(--mono);
+      font-size: 12px;
+      line-height: 1.6;
+      margin: 0 0 20px;
+    }
+    pre code { background: transparent; border: 0; padding: 0; }
+    .eyebrow {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: var(--eyebrow);
+      text-transform: uppercase;
+      color: var(--amber-dim);
+      margin: 0 0 8px;
+    }
+    .step {
+      border-top: 1px dashed var(--hair);
+      padding-top: 28px;
+      margin-top: 28px;
+    }
+    .step .num {
+      font-family: var(--display);
+      font-size: 40px;
+      color: var(--amber);
+      line-height: 1;
+      margin: 0 0 4px;
+    }
+    ul.checklist {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 16px;
+    }
+    ul.checklist li {
+      padding: 6px 0;
+      border-bottom: 1px dashed var(--hair);
+    }
+    ul.checklist li:last-child { border-bottom: 0; }
+    .pill {
+      display: inline-block;
+      padding: 2px 8px;
+      border: 1px solid var(--ink);
+      background: var(--cream);
+      font-size: 10px;
+      letter-spacing: var(--eyebrow);
+      text-transform: uppercase;
+      margin-left: 6px;
+    }
+    .cta {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 12px 18px;
+      background: var(--ink);
+      color: var(--cream);
+      text-decoration: none;
+      font-size: 12px;
+      letter-spacing: var(--eyebrow);
+      text-transform: uppercase;
+      border: 1px solid var(--ink);
+    }
+    .cta:hover { background: var(--amber); border-color: var(--amber); color: var(--ink); }
+    .cta.ghost { background: var(--cream); color: var(--ink); margin-left: 8px; }
+    .cta.ghost:hover { background: var(--bg); color: var(--ink); }
+
+    footer {
+      border-top: 1px solid var(--hair);
+      background: var(--cream);
+      padding: 22px 28px;
+      font-size: 11px;
+      color: var(--pencil);
+      letter-spacing: var(--eyebrow);
+      text-transform: uppercase;
+      text-align: center;
+    }
+
+    @media (max-width: 480px) {
+      h1 { font-size: 40px; }
+      h2 { font-size: 24px; }
+      main { padding: 32px 20px 64px; }
+      pre { font-size: 11px; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="/" class="lockup" style="text-decoration: none;">
+      <img src="/otto/sprites/otter-idle.svg" alt="otto" />
+      <span class="name">otto</span>
+    </a>
+    <div class="nav-links">
+      <a href="/">home</a>
+      <a href="/docs/install" class="active">install</a>
+      <a href="/login">log in</a>
+      <a href="/signup">sign up</a>
+    </div>
+  </nav>
+
+  <main>
+    <p class="eyebrow">install · two minutes</p>
+    <h1>drop otto<br/>on your app.</h1>
+    <p class="lede">
+      One script tag. Your team flags bugs while testing.
+      Otto reads each report, finds the relevant code, and opens a
+      draft PR on the right repo. Never auto-merges.
+    </p>
+
+    <p>
+      <a href="/signup" class="cta">create an account</a>
+      <a href="/" class="cta ghost">see how it works</a>
+    </p>
+
+    <h2>what you'll need</h2>
+    <ul class="checklist">
+      <li>a <a href="https://cursor.com" target="_blank" rel="noopener noreferrer">cursor</a> account with an API key <span class="pill">required</span></li>
+      <li>a github repo where Otto should open PRs <span class="pill">required</span></li>
+      <li>a page in your app to drop the widget onto <span class="pill">required</span></li>
+    </ul>
+
+    <div class="step">
+      <p class="num">01</p>
+      <h2>create a project</h2>
+      <p>
+        Sign in at <a href="/dashboard/">/dashboard/</a>. Each project owns
+        a widget snippet and routes feedback to its primary repo.
+      </p>
+      <h3>in the dashboard</h3>
+      <pre><code>projects → + new project → name → create</code></pre>
+      <p>
+        You'll land on the project's detail page with a getting-started
+        checklist. Wire the Cursor key and install the GitHub App from
+        Settings, then come back to set this project's primary repo.
+      </p>
+    </div>
+
+    <div class="step">
+      <p class="num">02</p>
+      <h2>paste the snippet</h2>
+      <p>
+        Once team setup is done, the project detail page shows a
+        ready-to-paste snippet with the project's secret baked in.
+        Drop it on the staging or prod build of your app — feedback
+        from anyone using the widget on that page lands in this
+        project.
+      </p>
+      <h3>what the snippet looks like</h3>
+      <pre><code>&lt;script
+  src=&quot;https://ottoagent.app/otto.js&quot;
+  data-endpoint=&quot;https://&lt;your-convex&gt;.convex.site/ingest/widget&quot;
+  data-secret=&quot;wk_abc123…&quot;
+  defer
+&gt;&lt;/script&gt;</code></pre>
+      <p>
+        <strong>One script tag.</strong> No build tools, no SDK, no
+        framework requirements. Works in any HTML page.
+      </p>
+    </div>
+
+    <div class="step">
+      <p class="num">03</p>
+      <h2>file feedback</h2>
+      <p>
+        A pixel-otter button appears bottom-right of your page. Click
+        it to start recording. Click again to stop and review what you
+        captured. Submit, and Otto opens a draft PR within a few
+        minutes.
+      </p>
+      <h3>what otto sends to cursor</h3>
+      <ul class="checklist">
+        <li>your description of what's wrong</li>
+        <li>the page URL where the feedback was filed</li>
+        <li>console errors from the last few seconds</li>
+        <li>viewport + user agent for layout context</li>
+      </ul>
+    </div>
+
+    <h2>trust contract</h2>
+    <ul class="checklist">
+      <li><strong>PRs always land as draft.</strong> Otto fails closed if it can't verify draft status.</li>
+      <li><strong>Scoped to its own branch.</strong> Otto never pushes to main.</li>
+      <li><strong>Original feedback + confidence land in the PR description.</strong> You can see exactly what Otto read.</li>
+      <li><strong>Existing tests cannot be weakened.</strong> Hard-coded into the agent prompt.</li>
+    </ul>
+
+    <h2>questions</h2>
+    <p>
+      Hit a wall? <a href="https://github.com/Dan-Cleary/otto/discussions" target="_blank" rel="noopener noreferrer">Open a discussion on GitHub</a>
+      or ping <a href="https://x.com/DanJCleary" target="_blank" rel="noopener noreferrer">@DanJCleary on X</a>.
+    </p>
+
+    <p style="margin-top: 40px;">
+      <a href="/signup" class="cta">get started →</a>
+    </p>
+  </main>
+
+  <footer>otto · install</footer>
+</body>
+</html>

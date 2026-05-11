@@ -134,13 +134,26 @@ function SignInScreen() {
           <input
             name="password"
             aria-label="password"
-            placeholder="password"
+            placeholder={flow === "signUp" ? "password — 8+ characters" : "password"}
             type="password"
             autoComplete={flow === "signIn" ? "current-password" : "new-password"}
             required
             minLength={8}
             style={{ width: "100%" }}
           />
+          {flow === "signUp" && (
+            <p
+              className="muted"
+              style={{
+                fontSize: 11,
+                margin: "4px 0 0",
+                color: "var(--otto-pencil, #6b6356)",
+                textAlign: "left",
+              }}
+            >
+              minimum 8 characters
+            </p>
+          )}
           <input name="flow" type="hidden" value={flow} />
           <div className="row" style={{ marginTop: 14 }}>
             <button className="primary" type="submit" disabled={busy}>
