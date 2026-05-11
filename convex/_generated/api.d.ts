@@ -29,6 +29,7 @@ import type * as repos from "../repos.js";
 import type * as reposDb from "../reposDb.js";
 import type * as router from "../router.js";
 import type * as routerDb from "../routerDb.js";
+import type * as seed from "../seed.js";
 import type * as slack from "../slack.js";
 import type * as slackDb from "../slackDb.js";
 import type * as teams from "../teams.js";
@@ -63,6 +64,7 @@ declare const fullApi: ApiFromModules<{
   reposDb: typeof reposDb;
   router: typeof router;
   routerDb: typeof routerDb;
+  seed: typeof seed;
   slack: typeof slack;
   slackDb: typeof slackDb;
   teams: typeof teams;
