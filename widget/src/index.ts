@@ -203,6 +203,8 @@ const OTTER_ERROR = SVG_PREFIX + OTTER_ERROR_B64;
   max-width: 320px;
   min-width: 180px;
   min-height: 34px;
+  max-height: 240px;
+  overflow-y: auto;
   display: none;
   box-shadow: 4px 4px 0 ${HAIR};
   white-space: pre-wrap;
@@ -460,6 +462,10 @@ const OTTER_ERROR = SVG_PREFIX + OTTER_ERROR_B64;
         recognition.interimResults = true;
         recognition.lang = navigator.language || "en-US";
         recognition.onresult = (event: any) => {
+          // Guard: browsers can deliver a final buffered result after
+          // recognition.stop(). Without this, finalTranscript would
+          // mutate after we already pre-filled the modal.
+          if (!isListening) return;
           let final = "";
           let interim = "";
           for (let i = event.resultIndex; i < event.results.length; i++) {
