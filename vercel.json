@@ -6,24 +6,14 @@
   "framework": null,
   "cleanUrls": true,
   "redirects": [
-    { "source": "/app", "destination": "/dashboard/", "permanent": false },
-    { "source": "/app/(.*)", "destination": "/dashboard/$1", "permanent": false },
-    { "source": "/dashboard", "destination": "/dashboard/", "permanent": false },
-    { "source": "/auth/github/callback", "destination": "/dashboard/", "permanent": false }
-  ],
-  "rewrites": [
-    {
-      "source": "/auth/zoom/callback",
-      "destination": "https://resolute-lemming-209.convex.site/auth/zoom/callback"
-    },
-    {
-      "source": "/zoom/webhook",
-      "destination": "https://resolute-lemming-209.convex.site/zoom/webhook"
-    },
-    {
-      "source": "/github/webhook",
-      "destination": "https://resolute-lemming-209.convex.site/github/webhook"
-    }
+    { "source": "/app", "destination": "/", "permanent": false },
+    { "source": "/app/(.*)", "destination": "/", "permanent": false },
+    { "source": "/dashboard", "destination": "/", "permanent": false },
+    { "source": "/dashboard/(.*)", "destination": "/", "permanent": false },
+    { "source": "/login", "destination": "/", "permanent": false },
+    { "source": "/signup", "destination": "/", "permanent": false },
+    { "source": "/docs/(.*)", "destination": "/", "permanent": false },
+    { "source": "/auth/github/callback", "destination": "/", "permanent": false }
   ],
   "headers": [
     {
